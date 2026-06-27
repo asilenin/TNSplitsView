@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
+    <iq:application id="7c294f6c-58ec-4064-bcfe-342189d548f0" type="datafield" name="@Strings.AppName" entry="SplitsApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.1.0">
+        <iq:products>
+            <iq:product id="fr965"/>
+            <iq:product id="fr970"/>
+        </iq:products>
+        <iq:permissions>
+            <iq:uses-permission id="FitContributor"/>
+        </iq:permissions>
+        <iq:languages>
+            <iq:language>eng</iq:language>
+        </iq:languages>
+        <iq:barrels/>
+    </iq:application>
+</iq:manifest>

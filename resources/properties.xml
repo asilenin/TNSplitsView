@@ -1,0 +1,4 @@
+<properties>
+    <property id="fontMode" type="number">0</property>
+    <property id="lactateEnabled" type="boolean">false</property>
+</properties>

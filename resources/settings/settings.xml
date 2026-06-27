@@ -1,0 +1,12 @@
+<settings>
+    <setting propertyKey="@Properties.fontMode" title="@Strings.SetFont">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.FontMin</listEntry>
+            <listEntry value="1">@Strings.FontMed</listEntry>
+            <listEntry value="2">@Strings.FontMax</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.lactateEnabled" title="@Strings.SetLactate">
+        <settingConfig type="boolean" />
+    </setting>
+</settings>
