@@ -1,12 +1,127 @@
 <settings>
-    <setting propertyKey="@Properties.fontMode" title="@Strings.SetFont">
+    <setting propertyKey="@Properties.useTouch" title="@Strings.SetTouch" prompt="@Strings.SetTouchPrompt">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.listMode" title="@Strings.SetListMode" prompt="@Strings.SetListModePrompt">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.FontMin</listEntry>
-            <listEntry value="1">@Strings.FontMed</listEntry>
-            <listEntry value="2">@Strings.FontMax</listEntry>
+            <listEntry value="0">@Strings.ListMin</listEntry>
+            <listEntry value="1">@Strings.ListMid</listEntry>
+            <listEntry value="2">@Strings.ListMax</listEntry>
+            <listEntry value="3">@Strings.ListCycleTap</listEntry>
+            <listEntry value="4">@Strings.ListCycleTimer</listEntry>
         </settingConfig>
     </setting>
-    <setting propertyKey="@Properties.lactateEnabled" title="@Strings.SetLactate">
+
+    <setting propertyKey="@Properties.cycleSec" title="@Strings.SetCycleSec" prompt="@Strings.SetCycleSecPrompt">
+        <settingConfig type="numeric" min="1" max="60" />
+    </setting>
+
+    <setting propertyKey="@Properties.lactateEnabled" title="@Strings.SetLactate" prompt="@Strings.SetLactatePrompt">
         <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.thresholdUnit" title="@Strings.SetUnit" prompt="@Strings.SetUnitPrompt">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.UnitKm</listEntry>
+            <listEntry value="1">@Strings.UnitMile</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.pace1" title="@Strings.Pace1" prompt="@Strings.PacePrompt">
+        <settingConfig type="alphaNumeric" maxLength="5" />
+    </setting>
+    <setting propertyKey="@Properties.pace2" title="@Strings.Pace2" prompt="@Strings.PacePrompt">
+        <settingConfig type="alphaNumeric" maxLength="5" />
+    </setting>
+    <setting propertyKey="@Properties.pace3" title="@Strings.Pace3" prompt="@Strings.PacePrompt">
+        <settingConfig type="alphaNumeric" maxLength="5" />
+    </setting>
+    <setting propertyKey="@Properties.pace4" title="@Strings.Pace4" prompt="@Strings.PacePrompt">
+        <settingConfig type="alphaNumeric" maxLength="5" />
+    </setting>
+    <setting propertyKey="@Properties.pace5" title="@Strings.Pace5" prompt="@Strings.PacePrompt">
+        <settingConfig type="alphaNumeric" maxLength="5" />
+    </setting>
+    <setting propertyKey="@Properties.pace6" title="@Strings.Pace6" prompt="@Strings.PacePrompt">
+        <settingConfig type="alphaNumeric" maxLength="5" />
+    </setting>
+
+    <setting propertyKey="@Properties.color1" title="@Strings.Color1">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.color2" title="@Strings.Color2">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.color3" title="@Strings.Color3">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.color4" title="@Strings.Color4">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.color5" title="@Strings.Color5">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.color6" title="@Strings.Color6">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.color7" title="@Strings.Color7">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ColWhite</listEntry>
+            <listEntry value="1">@Strings.ColCyan</listEntry>
+            <listEntry value="2">@Strings.ColGreen</listEntry>
+            <listEntry value="3">@Strings.ColYellow</listEntry>
+            <listEntry value="4">@Strings.ColOrange</listEntry>
+            <listEntry value="5">@Strings.ColRed</listEntry>
+            <listEntry value="6">@Strings.ColPurple</listEntry>
+        </settingConfig>
     </setting>
 </settings>

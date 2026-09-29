@@ -1,0 +1,11 @@
+# артефакты сборки Connect IQ
+bin/
+gen/
+mir/
+internal-mir/
+*.prg
+*.prg.debug.xml
+*.iq
+*-settings.json
+*-fit_contributions.json
+.DS_Store
