@@ -1,8 +1,53 @@
 <strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
-    <string id="AppName">TN Splits View</string>
-    <string id="SetFont">Font size</string>
-    <string id="FontMin">Min (8 rows)</string>
-    <string id="FontMed">Med (6 rows)</string>
-    <string id="FontMax">Max (1 card)</string>
+    <string id="AppName">test TN Splits View</string>
+
+    <string id="SetTouch">Use touch screen</string>
+    <string id="SetTouchPrompt">Turn off to disable all touch features (layout switching by tap, lactate input). On watches without a touch screen these features are always off regardless of this setting.</string>
+
+    <string id="SetListMode">List layout</string>
+    <string id="SetListModePrompt">Pick a fixed layout, or cycle MIN to MID to MAX. "Cycle by tap" needs touch; "Cycle by timer" works without touch.</string>
+    <string id="ListMin">MIN only (8 rows)</string>
+    <string id="ListMid">MID only (carousel)</string>
+    <string id="ListMax">MAX only (1 card)</string>
+    <string id="ListCycleTap">Cycle by tap (center)</string>
+    <string id="ListCycleTimer">Cycle by timer</string>
+
+    <string id="SetCycleSec">Cycle interval (seconds)</string>
+    <string id="SetCycleSecPrompt">Used only with "Cycle by timer". Layout changes every N seconds.</string>
+
     <string id="SetLactate">Enable lactate input</string>
+    <string id="SetLactatePrompt">Requires touch. If the watch has no touch screen, or touch is turned off above, lactate input stays disabled.</string>
+
+    <string id="SetUnit">Pace threshold units</string>
+    <string id="SetUnitPrompt">Units you enter pace thresholds in. The list on the watch always uses your system units.</string>
+    <string id="UnitKm">Per kilometer</string>
+    <string id="UnitMile">Per mile</string>
+
+    <string id="PacePrompt">Pace as mm:ss (e.g. 4:30)</string>
+    <string id="Pace1">Zone 1 upper pace</string>
+    <string id="Pace2">Zone 2 upper pace</string>
+    <string id="Pace3">Zone 3 upper pace</string>
+    <string id="Pace4">Zone 4 upper pace</string>
+    <string id="Pace5">Zone 5 upper pace</string>
+    <string id="Pace6">Zone 6 upper pace</string>
+
+    <string id="Color1">Zone 1 color (fastest)</string>
+    <string id="Color2">Zone 2 color</string>
+    <string id="Color3">Zone 3 color</string>
+    <string id="Color4">Zone 4 color</string>
+    <string id="Color5">Zone 5 color</string>
+    <string id="Color6">Zone 6 color</string>
+    <string id="Color7">Zone 7 color (slowest)</string>
+
+    <string id="ColWhite">White</string>
+    <string id="ColCyan">Cyan</string>
+    <string id="ColGreen">Green</string>
+    <string id="ColYellow">Yellow</string>
+    <string id="ColOrange">Orange</string>
+    <string id="ColRed">Red</string>
+    <string id="ColPurple">Purple</string>
+
+    <string id="LactateLabel">Lactate</string>
+    <string id="LactateGraphLabel">Blood Lactate</string>
+    <string id="LactateUnits">mmol/L</string>
 </strings>

@@ -1,4 +1,27 @@
 <properties>
-    <property id="fontMode" type="number">0</property>
+    <!-- использовать тачскрин (если в устройстве нет touch — функции всё равно выключены) -->
+    <property id="useTouch" type="boolean">true</property>
+    <!-- режим списка: 0=MIN, 1=MID, 2=MAX, 3=Cycle by tap, 4=Cycle by timer -->
+    <property id="listMode" type="number">3</property>
+    <!-- интервал автопереключения для "Cycle by timer", секунды -->
+    <property id="cycleSec" type="number">5</property>
+    <!-- ввод лактата вкл/выкл -->
     <property id="lactateEnabled" type="boolean">false</property>
+    <!-- единицы ввода порогов: 0=km, 1=mile -->
+    <property id="thresholdUnit" type="number">0</property>
+    <!-- пороги темпа mm:ss (верхние границы зон 1..6); зона 7 = бесконечность -->
+    <property id="pace1" type="string">4:00</property>
+    <property id="pace2" type="string">4:30</property>
+    <property id="pace3" type="string">5:00</property>
+    <property id="pace4" type="string">5:30</property>
+    <property id="pace5" type="string">6:00</property>
+    <property id="pace6" type="string">7:00</property>
+    <!-- цвета зон 1..7 (индекс палитры) -->
+    <property id="color1" type="number">6</property>
+    <property id="color2" type="number">5</property>
+    <property id="color3" type="number">4</property>
+    <property id="color4" type="number">3</property>
+    <property id="color5" type="number">2</property>
+    <property id="color6" type="number">1</property>
+    <property id="color7" type="number">0</property>
 </properties>
