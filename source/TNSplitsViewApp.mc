@@ -551,8 +551,13 @@ class SplitsView extends WatchUi.DataField {
         var right = Graphics.TEXT_JUSTIFY_RIGHT;
         if (it[0] == 0) {
             var live = (it[5] == -1);
-            txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
-            txt(dc, cx - sc(22), y, _fRow, fmtTime(it[2]), _fg, right);
+            var sec = it[2];
+            // время от 10:00 доходит до номера и слипается с ним («10152:30»), а сдвинуть номер некуда: у крайних
+            // строк с включённым лактатом он уже у края экрана. Номер такого круга виден в MID и MAX (TSV-26)
+            if (sec < 600) {
+                txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
+            }
+            txt(dc, cx - sc(22), y, _fRow, fmtTime(sec), _fg, right);
             txt(dc, cx + sc(62), y, _fRow, fmtDist(it[3]), _dim, right);
             txt(dc, cx + sc(150), y, _fRow, fmtPaceU(it[4]), live ? _fg : colorFor(it[4]), right);
         } else {
