@@ -325,8 +325,12 @@ class SplitsView extends WatchUi.DataField {
         _fBig = WatchUi.loadResource(Rez.Fonts.Big);
     }
 
+    // круг от часа — часы и минуты без секунд («1h05»): «65:00» и «120:00» шире пяти знаков и в списке MIN доходили
+    // до номера круга (TSV-29)
     function fmtTime(sec) {
-        var s = sec.toNumber(); return (s/60).format("%d") + ":" + (s%60).format("%02d");
+        var s = sec.toNumber();
+        if (s >= 3600) { return (s/3600).format("%d") + "h" + (s%3600/60).format("%02d"); }
+        return (s/60).format("%d") + ":" + (s%60).format("%02d");
     }
     function fmtPace(p) {
         if (p <= 0) { return "--"; }
@@ -562,13 +566,11 @@ class SplitsView extends WatchUi.DataField {
         var right = Graphics.TEXT_JUSTIFY_RIGHT;
         if (it[0] == 0) {
             var live = (it[5] == -1);
-            var sec = it[2];
-            // время от 10:00 доходит до номера и слипается с ним («10152:30»), а сдвинуть номер некуда: у крайних
-            // строк он уже у края круглого экрана. Номер такого круга виден в MID и MAX (TSV-26)
-            if (sec < 600) {
-                txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
-            }
-            txt(dc, cx - sc(22), y, _fRow, fmtTime(sec), _fg, right);
+            // номер на 8 px макета левее прежнего: время до пяти знаков («52:30») отходит от него на 10 px (на мелких
+            // экранах на 5–8), а не слипается («10152:30»). На целый знак нельзя: трёхзначный номер в верхней и нижней строке
+            // срезался бы краем круглого экрана (TSV-29)
+            txt(dc, cx - sc(112), y, _fRow, it[1].format("%d"), _dim, right);
+            txt(dc, cx - sc(22), y, _fRow, fmtTime(it[2]), _fg, right);
             txt(dc, cx + sc(62), y, _fRow, fmtDistRow(it[3]), _dim, right);
             txt(dc, cx + sc(150), y, _fRow, fmtPaceU(it[4]), live ? _fg : colorFor(it[4]), right);
         } else {
