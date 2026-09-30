@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>TSV-18 · макет в языке TN Watch Face</title>
+<!-- TSV-18, шаг 0: два экрана (список с максимумом строк и ввод лактата) — как сейчас и в языке циферблата.
+     Экран 454×454 круглый, как у fr965. «Как сейчас» — приближение: системный шрифт вместо шрифта Garmin. -->
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@800&display=block" rel="stylesheet">
+<style>
+  :root { --page: #161616; --ink: #cfcfcf; }
+  body { margin: 0; padding: 24px; background: var(--page); color: var(--ink);
+         font: 14px/1.4 -apple-system, system-ui, sans-serif; }
+  h2 { font-weight: 600; font-size: 15px; margin: 28px 0 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 32px; }
+  figure { margin: 0; }
+  figcaption { margin-top: 10px; text-align: center; max-width: 494px; }
+  .watch { width: 494px; height: 494px; border-radius: 50%; background: #2a2a2a; display: grid; place-items: center; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<h2>Список кругов — режим «8 строк» (максимум), 7 кругов, замер лактата и живой круг</h2>
+<div class="row" id="list"></div>
+<h2>Ввод лактата</h2>
+<div class="row" id="input"></div>
+<script>
+const W = 454, C = W / 2;
+const COL = { white: '#FFFFFF', blue: '#33CCFF', green: '#00DD00', yellow: '#FFFF00', orange: '#FF8800', red: '#FF0000' };
+const FG = '#DCDCDC', DIM = '#7A7A7A', LINE = '#3A3A3A';
+const SW = 68;                       // зона переключения: 16% ширины минус 5 px, как в zoneW()
+
+// Данные примера: [номер, время, дистанция, темп, цвет] | лактат ['LA', значение, время замера]
+const ROWS = [
+  [1, '4:58', '1.00', '4:58', COL.green],
+  [2, '4:41', '1.00', '4:41', COL.green],
+  ['LA', '1,8', '14:12'],
+  [3, '4:32', '1.00', '4:32', COL.yellow],
+  [4, '4:19', '1.00', '4:19', COL.orange],
+  [5, '4:07', '1.00', '4:07', COL.red],
+  [6, '4:11', '1.00', '4:11', COL.red],
+  [7, '2:03', '0.48', '4:16', 'live'],
+];
+
+const svg = (inner, clipId) => `<svg width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">
+  <defs><clipPath id="${clipId}"><circle cx="${C}" cy="${C}" r="${C}"/></clipPath></defs>
+  <g clip-path="url(#${clipId})"><rect width="${W}" height="${W}" fill="#000"/>${inner}</g></svg>`;
+
+const txt = (x, y, s, o) => `<text x="${x}" y="${y}" fill="${o.fill}" font-family="${o.ff}" font-weight="${o.fw || 400}" font-size="${o.fs}"
+  text-anchor="${o.anchor || 'start'}" dominant-baseline="central" ${o.ls ? `letter-spacing="${o.ls}"` : ''}>${s}</text>`;
+
+// Капля — нарисованный значок вместо эмодзи (в Inter и Courier Prime его нет).
+const drop = (x, y, h, c) => { const k = h / 20;
+  return `<path transform="translate(${x} ${y}) scale(${k})" d="M0 -10 C4 -4 7 -0.5 7 3.5 A7 7 0 0 1 -7 3.5 C-7 -0.5 -4 -4 0 -10 Z" fill="${c}"/>`; };
+const chevron = (x, y, c, dir) => `<path d="M${x - 4 * dir} ${y - 8} L${x + 4 * dir} ${y} L${x - 4 * dir} ${y + 8}" stroke="${c}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+// ——— список: как сейчас (приближение) ———
+function listNow() {
+  const rh = W / 8; let s = '';
+  ROWS.forEach((r, i) => {
+    const y = i * rh + rh / 2, ff = 'Helvetica, Arial, sans-serif';
+    if (i === 7) s += `<line x1="45" y1="${i * rh}" x2="354" y2="${i * rh}" stroke="#AAA" stroke-width="1.5"/>`;
+    if (r[0] === 'LA') s += txt(9, y, `💧 ${r[1]}  ${r[2]}`, { fill: COL.blue, ff, fs: 30 });
+    else s += txt(9, y, `${r[0]}  ${r[1]}  ${r[2]}  ${r[3]}`, { fill: r[4] === 'live' ? '#FFF' : r[4], ff, fs: 30 });
+  });
+  s += `<rect x="${W - SW}" y="${C - 45}" width="${SW}" height="90" fill="#555"/>`
+     + txt(W - SW / 2, C - 14, '💧', { fill: '#FFF', ff: 'Helvetica', fs: 28, anchor: 'middle' })
+     + txt(W - SW / 2, C + 18, '&gt;', { fill: '#FFF', ff: 'Helvetica', fs: 28, anchor: 'middle' });
+  return svg(s, 'cl1');
+}
+
+// ——— список: язык циферблата ———
+// Цвет несёт только смысл: у круга — темп (значок-точка и сам темп), у замера — голубая капля. Остальное серое.
+// Верхняя и нижняя строки у круглого края короче (в них 218 px ширины): только время и темп, как края «карусели».
+function listNew() {
+  const rh = W / 8, cx = (W - SW) / 2 - 2; let s = '';
+  const CO = "'Courier Prime', 'Courier New', monospace", IN = "Inter, Helvetica, sans-serif";
+  ROWS.forEach((r, i) => {
+    const y = i * rh + rh / 2, edge = i === 0 || i === 7;
+    if (i === 7) s += `<line x1="70" y1="${i * rh}" x2="${W - SW - 6}" y2="${i * rh}" stroke="${LINE}" stroke-width="2"/>`;
+    if (r[0] === 'LA') {
+      s += drop(cx - 82, y, 26, COL.blue)
+        + txt(cx - 56, y, r[1], { fill: COL.blue, ff: IN, fw: 800, fs: 34 })
+        + txt(cx + 96, y, r[2], { fill: DIM, ff: CO, fw: 700, fs: 28, anchor: 'end' });
+      return;
+    }
+    const live = r[4] === 'live', dot = live ? FG : r[4], pace = live ? FG : r[4];
+    if (edge) {                                   // краевая: без номера и дистанции
+      s += txt(cx - 6, y, r[1], { fill: live ? FG : DIM, ff: CO, fw: 700, fs: 26, anchor: 'end' })
+        + txt(cx + 6, y, r[3], { fill: pace, ff: IN, fw: 800, fs: 28 });
+    } else {
+      s += `<circle cx="${cx - 152}" cy="${y}" r="5" fill="${dot}"/>`
+        + txt(cx - 136, y, r[0], { fill: DIM, ff: CO, fw: 700, fs: 26 })
+        + txt(cx - 38, y, r[1], { fill: FG, ff: CO, fw: 700, fs: 28, anchor: 'end' })
+        + txt(cx + 50, y, r[2], { fill: DIM, ff: CO, fw: 400, fs: 26, anchor: 'end' })
+        + txt(cx + 148, y, r[3], { fill: pace, ff: IN, fw: 800, fs: 30, anchor: 'end' });
+    }
+  });
+  // Переключатель на лактат: тонкая плашка у края, капля и стрелка линиями; зона касания та же (16% ширины)
+  s += `<rect x="${W - SW + 14}" y="${C - 45}" width="${SW - 14}" height="90" rx="16" fill="none" stroke="${LINE}" stroke-width="2"/>`
+    + drop(W - SW / 2 + 7, C - 16, 24, FG) + chevron(W - SW / 2 + 7, C + 24, FG, 1);
+  return svg(s, 'cl2');
+}
+
+// ——— ввод лактата ———
+// Геометрия зон прежняя: 3×2, плюсы сверху по краям, минусы снизу по краям, OK по центру снизу, значение по центру сверху.
+function inputNow() {
+  const cw = W / 3, rh = W / 2, ff = 'Helvetica, Arial, sans-serif'; let s = '';
+  s += `<rect x="0" y="0" width="${cw}" height="${rh}" fill="#00AA00"/><rect x="${2 * cw}" y="0" width="${cw}" height="${rh}" fill="#00AA00"/>`
+    + `<rect x="0" y="${rh}" width="${cw}" height="${rh}" fill="#CC0000"/><rect x="${2 * cw}" y="${rh}" width="${cw}" height="${rh}" fill="#CC0000"/>`
+    + `<rect x="${cw}" y="${rh}" width="${cw}" height="${rh}" fill="#FFF"/>`;
+  const tY = rh * 0.72, bY = rh + rh * 0.28;
+  [['+1', cw / 2, tY], ['+0,1', 2.5 * cw, tY], ['-1', cw / 2, bY], ['-0,1', 2.5 * cw, bY]]
+    .forEach(a => s += txt(a[1], a[2], a[0], { fill: '#FFF', ff, fs: 34, anchor: 'middle' }));
+  s += txt(1.5 * cw, bY, 'OK', { fill: '#000', ff, fs: 34, anchor: 'middle' })
+    + txt(1.5 * cw, tY, '6,4', { fill: '#FFF', ff, fs: 56, anchor: 'middle' });
+  s += `<rect x="0" y="${rh - 45}" width="${SW}" height="90" fill="#555"/>`
+    + txt(SW / 2, rh - 14, '🔁', { fill: '#FFF', ff, fs: 28, anchor: 'middle' })
+    + txt(SW / 2, rh + 18, '&lt;', { fill: '#FFF', ff, fs: 28, anchor: 'middle' });
+  return svg(s, 'ci1');
+}
+
+// В языке циферблата: заливки уходят, зоны — тонкие линии-разделители; «+»/«−» — цветом текста (это смысл: больше/меньше),
+// OK — единственная светлая плашка, как «бумажная» карточка; значение — крупный Inter.
+function inputNew() {
+  const cw = W / 3, rh = W / 2; let s = '';
+  const CO = "'Courier Prime', 'Courier New', monospace", IN = "Inter, Helvetica, sans-serif";
+  s += `<line x1="${cw}" y1="60" x2="${cw}" y2="${W - 60}" stroke="${LINE}" stroke-width="2"/>`
+    + `<line x1="${2 * cw}" y1="60" x2="${2 * cw}" y2="${W - 60}" stroke="${LINE}" stroke-width="2"/>`
+    + `<line x1="40" y1="${rh}" x2="${W - 40}" y2="${rh}" stroke="${LINE}" stroke-width="2"/>`;
+  const tY = rh * 0.72, bY = rh + rh * 0.28, G = '#00DD00', R = '#FF4040';
+  s += txt(cw / 2 + 10, tY, '+1', { fill: G, ff: CO, fw: 700, fs: 40, anchor: 'middle' })
+    + txt(2.5 * cw - 10, tY, '+0,1', { fill: G, ff: CO, fw: 700, fs: 34, anchor: 'middle' })
+    + txt(cw / 2 + 10, bY, '−1', { fill: R, ff: CO, fw: 700, fs: 40, anchor: 'middle' })
+    + txt(2.5 * cw - 10, bY, '−0,1', { fill: R, ff: CO, fw: 700, fs: 34, anchor: 'middle' });
+  s += drop(1.5 * cw - 62, rh * 0.34, 28, COL.blue)
+    + txt(1.5 * cw + 8, tY - 8, '6,4', { fill: FG, ff: IN, fw: 800, fs: 64, anchor: 'middle' })
+    + txt(1.5 * cw, rh * 0.33, 'MMOL/L', { fill: DIM, ff: CO, fw: 700, fs: 15, anchor: 'middle', ls: 2 });
+  s += `<rect x="${cw + 14}" y="${rh + 14}" width="${cw - 28}" height="${rh * 0.5}" rx="24" fill="#DCDCDC"/>`
+    + txt(1.5 * cw, rh + 14 + rh * 0.25, 'OK', { fill: '#111', ff: IN, fw: 800, fs: 38, anchor: 'middle' });
+  s += `<rect x="-20" y="${rh - 45}" width="${SW + 20 - 14}" height="90" rx="16" fill="none" stroke="${LINE}" stroke-width="2"/>`
+    + chevron(SW / 2 - 7, rh - 24, FG, -1) + drop(SW / 2 - 7, rh + 16, 24, FG);
+  return svg(s, 'ci2');
+}
+
+const fig = (id, html, cap) => document.getElementById(id).insertAdjacentHTML('beforeend',
+  `<figure><div class="watch">${html}</div><figcaption>${cap}</figcaption></figure>`);
+fig('list', listNow(), 'Как сейчас (приближение)');
+fig('list', listNew(), 'В языке циферблата: Courier Prime — цифры и подписи, Inter ExtraBold — темп; цвет только у темпа и замера');
+fig('input', inputNow(), 'Как сейчас (приближение)');
+fig('input', inputNew(), 'В языке циферблата: заливки убраны, «+»/«−» цветом текста, OK — светлая плашка, значение — Inter');
+</script>
+</body>
+</html>
