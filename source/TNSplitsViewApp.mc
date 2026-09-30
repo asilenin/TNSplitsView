@@ -628,9 +628,15 @@ class SplitsView extends WatchUi.DataField {
         // остальные, сдвинутые влево, вылезали за левый край круга (TSV-27)
         var cx = active ? listCx() : _w / 2;
         if (it[0] == 0) {
-            var head = fmtTime(it[2]) + "  " + fmtDistRow(it[3]) + "  ";
-            if (!active) { head = it[1].format("%d") + "  " + head; }
+            var t = fmtTime(it[2]); var d = fmtDistRow(it[3]);
             var pace = fmtPaceU(it[4]);
+            var sep = "  ";
+            // с лактатом центральная строка сдвинута влево от плашки, и от 17 знаков (время или темп от 10:00) её начало
+            // уходит за край круга — тогда поля через один пробел. Порог sc(4): 16 знаков начинаются в 3–13 px от края,
+            // 17 — в -6…2. Потолок — круг от 100 минут и темп от 10:00: 17 знаков и через один пробел (TSV-30)
+            if (active && dc.getTextWidthInPixels(t + sep + d + sep + pace, font) / 2 > cx - sc(4)) { sep = " "; }
+            var head = t + sep + d + sep;
+            if (!active) { head = it[1].format("%d") + "  " + head; }
             var x = cx - (dc.getTextWidthInPixels(head, font) + dc.getTextWidthInPixels(pace, font)) / 2;
             txt(dc, x, y, font, head, _fg, Graphics.TEXT_JUSTIFY_LEFT);
             txt(dc, x + dc.getTextWidthInPixels(head, font), y, font, pace,
