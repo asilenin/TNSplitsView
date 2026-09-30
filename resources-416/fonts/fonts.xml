@@ -1,0 +1,6 @@
+<fonts>
+    <!-- Собраны tools/make_fonts.py из fonts-src/; руками не править. -->
+    <font id="Row" filename="row.fnt" antialias="true"/>
+    <font id="Key" filename="key.fnt" antialias="true"/>
+    <font id="Big" filename="big.fnt" antialias="true"/>
+</fonts>

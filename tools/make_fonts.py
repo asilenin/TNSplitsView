@@ -12,7 +12,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = 454
-SIDES = [454, 260, 218]  # fr965/fr970 — 454; fr255/fr255m/fr955 — 260; fr255s — 218
+# ширина экрана (у прямоугольных Venu Sq 2 и Venu X1 — меньшая сторона); модели — manifest.xml, папки — monkey.jungle
+SIDES = [454, 260, 218, 240, 280, 320, 360, 390, 416, 448, 466]
 TTF = "courierprime/CourierPrime-Bold.ttf"
 
 # id, размер в px (на экране 454), символы
