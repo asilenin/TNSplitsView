@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = 454
-SIDES = [454, 260]  # fr965/fr970 — 454; fr255/fr955 — 260
+SIDES = [454, 260, 218]  # fr965/fr970 — 454; fr255/fr255m/fr955 — 260; fr255s — 218
 TTF = "courierprime/CourierPrime-Bold.ttf"
 
 # id, размер в px (на экране 454), символы

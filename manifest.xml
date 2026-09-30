@@ -3,6 +3,8 @@
     <iq:application id="7c294f6c-58ec-4064-bcfe-342189d548f0" type="datafield" name="@Strings.AppName" entry="SplitsApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.1.0">
         <iq:products>
             <iq:product id="fr255"/>
+            <iq:product id="fr255m"/>
+            <iq:product id="fr255s"/>
             <iq:product id="fr955"/>
             <iq:product id="fr965"/>
             <iq:product id="fr970"/>
