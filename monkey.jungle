@@ -13,3 +13,4 @@ round-416x416.resourcePath = $(base.resourcePath);resources-416
 round-466x466.resourcePath = $(base.resourcePath);resources-466
 rectangle-320x360.resourcePath = $(base.resourcePath);resources-320
 rectangle-448x486.resourcePath = $(base.resourcePath);resources-448
+semiround-215x180.resourcePath = $(base.resourcePath);resources-215
