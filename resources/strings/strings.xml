@@ -55,4 +55,5 @@
     <string id="LactateLabel">Lactate</string>
     <string id="LactateGraphLabel">Blood Lactate</string>
     <string id="LactateUnits">mmol/L</string>
+    <string id="LactateStopLabel">Lactate after stop</string>
 </strings>

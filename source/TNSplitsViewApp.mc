@@ -97,8 +97,8 @@ class SplitsView extends WatchUi.DataField {
 
     // FIT
     var _fieldRecord;      // числовое record-поле (field 1)
-    var _fieldSession;     // строка session (field 2)
-    var _sessionStr;       // накопленная строка отметок
+    var _fieldSession;     // итоговое session-поле (field 2): замер, не отстоявший своё в потоке record
+    var _timerMs;          // timerTime прошлого compute: не изменился — таймер стоит
 
     function initialize() {
         DataField.initialize();
@@ -111,7 +111,7 @@ class SplitsView extends WatchUi.DataField {
         _settingsError = null;
         _touchOn = true; _cycleSec = 5; _cycleAccum = 0;
         _val10 = 20; _pending = 0; _holdSec = 0; _savedFlash = 0;
-        _sessionStr = "";
+        _timerMs = 0;
         _lapCount = 0;
         reloadSettings();
 
@@ -120,8 +120,10 @@ class SplitsView extends WatchUi.DataField {
                 "lactate", 1, FitContributor.DATA_TYPE_FLOAT,
                 { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "mmol/L" }
             );
-            // session-строка временно отключена для диагностики
-            _fieldSession = null;
+            _fieldSession = createField(
+                "lactate_stop", 2, FitContributor.DATA_TYPE_FLOAT,
+                { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "mmol/L" }
+            );
         }
     }
 
@@ -307,11 +309,22 @@ class SplitsView extends WatchUi.DataField {
         // несколько секунд, потому что Garmin прореживает поток на длинных
         // тренировках (~1 запись в 3с) — одиночная точка выпала бы. Держим 10с,
         // чтобы значение гарантированно попало в сохранённые сэмплы.
+        // TSV-31: часы пишут record-точки только при идущем таймере, поэтому 10 с держания
+        // считаются, только пока растёт timerTime: замер после «Стоп» ляжет в поток после «Продолжить».
+        // Если бегун сохранит тренировку, не продолжив, точек больше не будет — на этот случай замер
+        // лежит и в итоговом session-поле, которое часы пишут при сохранении. Когда замер отстоял
+        // 10 с в потоке, session-поле обнуляется: ненулевое значение в файле — замер, которого
+        // в потоке нет или не хватило (сохранили раньше 10 с); его читать коннектору Runner MCP.
+        var tMs = (info != null && info.timerTime != null) ? info.timerTime : _timerMs;
+        var running = (tMs != _timerMs);
+        _timerMs = tMs;
         _fieldRecord.setData(_pending / 10.0);
         if (_pending != 0) {
-            _holdSec -= 1;
+            _fieldSession.setData(_pending / 10.0);
+            if (running) { _holdSec -= 1; }
             if (_holdSec <= 0) {
                 _pending = 0;   // время держания вышло — дальше нули
+                _fieldSession.setData(0.0);
             }
         }
     }
@@ -617,9 +630,15 @@ class SplitsView extends WatchUi.DataField {
         // остальные, сдвинутые влево, вылезали за левый край круга (TSV-27)
         var cx = active ? listCx() : _w / 2;
         if (it[0] == 0) {
-            var head = fmtTime(it[2]) + "  " + fmtDistRow(it[3]) + "  ";
-            if (!active) { head = it[1].format("%d") + "  " + head; }
+            var t = fmtTime(it[2]); var d = fmtDistRow(it[3]);
             var pace = fmtPaceU(it[4]);
+            var sep = "  ";
+            // с лактатом центральная строка сдвинута влево от плашки, и от 17 знаков (время или темп от 10:00) её начало
+            // уходит за край круга — тогда поля через один пробел. Порог sc(4): 16 знаков начинаются в 3–13 px от края,
+            // 17 — в -6…2. Потолок — круг от 100 минут и темп от 10:00: 17 знаков и через один пробел (TSV-30)
+            if (active && dc.getTextWidthInPixels(t + sep + d + sep + pace, font) / 2 > cx - sc(4)) { sep = " "; }
+            var head = t + sep + d + sep;
+            if (!active) { head = it[1].format("%d") + "  " + head; }
             var x = cx - (dc.getTextWidthInPixels(head, font) + dc.getTextWidthInPixels(pace, font)) / 2;
             txt(dc, x, y, font, head, _fg, Graphics.TEXT_JUSTIFY_LEFT);
             txt(dc, x + dc.getTextWidthInPixels(head, font), y, font, pace,
