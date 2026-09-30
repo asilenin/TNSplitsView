@@ -4,9 +4,14 @@
     <string id="SetTouch">Use touch screen</string>
     <string id="SetTouchPrompt">Turn off to disable all touch features (layout switching by tap, lactate input). On watches without a touch screen these features are always off regardless of this setting.</string>
 
+    <string id="SetTheme">Theme</string>
+    <string id="SetThemePrompt">Dark is black with light text; Light is a white background with black text and darker zone colors.</string>
+    <string id="ThemeDark">Dark</string>
+    <string id="ThemeLight">Light</string>
+
     <string id="SetListMode">List layout</string>
     <string id="SetListModePrompt">Pick a fixed layout, or cycle MIN to MID to MAX. "Cycle by tap" needs touch; "Cycle by timer" works without touch.</string>
-    <string id="ListMin">MIN only (8 rows)</string>
+    <string id="ListMin">MIN only (11 rows)</string>
     <string id="ListMid">MID only (carousel)</string>
     <string id="ListMax">MAX only (1 card)</string>
     <string id="ListCycleTap">Cycle by tap (center)</string>

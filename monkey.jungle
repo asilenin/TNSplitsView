@@ -1,1 +1,6 @@
 project.manifest = manifest.xml
+
+# Шрифты — по стороне экрана (tools/make_fonts.py, TSV-18): fr965/fr970 — 454 px, fr255/fr955 — 260 px.
+base.resourcePath = resources
+round-454x454.resourcePath = $(base.resourcePath);resources-454
+round-260x260.resourcePath = $(base.resourcePath);resources-260

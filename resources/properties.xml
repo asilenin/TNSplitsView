@@ -1,6 +1,8 @@
 <properties>
     <!-- использовать тачскрин (если в устройстве нет touch — функции всё равно выключены) -->
     <property id="useTouch" type="boolean">true</property>
+    <!-- тема (TSV-18): 0=тёмная, 1=светлая с белым фоном -->
+    <property id="theme" type="number">0</property>
     <!-- режим списка: 0=MIN, 1=MID, 2=MAX, 3=Cycle by tap, 4=Cycle by timer -->
     <property id="listMode" type="number">3</property>
     <!-- интервал автопереключения для "Cycle by timer", секунды -->
