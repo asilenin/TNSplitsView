@@ -536,7 +536,7 @@ class SplitsView extends WatchUi.DataField {
         return (_w * 0.16).toNumber() - 5;
     }
 
-    // центр области списка с учётом правой зоны переключения
+    // центр строк на средней полосе экрана (центр карусели, карточка) с учётом правой зоны переключения
     function listCx() {
         if (_lactateEnabled) {
             var bw = zoneW();
@@ -547,13 +547,15 @@ class SplitsView extends WatchUi.DataField {
 
     // строка MIN: колонки по правому краю — номер, время, дистанция, темп; замер лактата — в тех же колонках
     function drawRow(dc, it, y) {
-        var cx = listCx();
+        // по центру экрана и при включённом лактате: сдвинутый влево от зоны переключения список срезал номер
+        // в верхней и нижней строке, а темп и по центру остаётся в 15–24 px от плашки зоны (TSV-27)
+        var cx = _w / 2;
         var right = Graphics.TEXT_JUSTIFY_RIGHT;
         if (it[0] == 0) {
             var live = (it[5] == -1);
             var sec = it[2];
             // время от 10:00 доходит до номера и слипается с ним («10152:30»), а сдвинуть номер некуда: у крайних
-            // строк с включённым лактатом он уже у края экрана. Номер такого круга виден в MID и MAX (TSV-26)
+            // строк он уже у края круглого экрана. Номер такого круга виден в MID и MAX (TSV-26)
             if (sec < 600) {
                 txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
             }
@@ -574,7 +576,9 @@ class SplitsView extends WatchUi.DataField {
     // Центрируем имеющиеся: активная запись всегда по центру, пустые слоты пусты.
     function drawCarousel(dc) {
         var center = _topIndex;
-        var ys = [ _h * 0.13, _h * 0.30, _h * 0.50, _h * 0.70, _h * 0.87 ];
+        // крайние строки не выше 23% высоты: выше строка «100  44:20  1.06  6:58» шире круглого экрана (самому
+        // тесному, 360, нужно 21,3%); шаг между строками ровный. Круг от 100 минут или от 10 км не влезет и так (TSV-27)
+        var ys = [ _h * 0.23, _h * 0.365, _h * 0.50, _h * 0.635, _h * 0.77 ];
         var off = [ -2, -1, 0, 1, 2 ];
         for (var i = 0; i < 5; i += 1) {
             var idx = center + off[i];
@@ -586,7 +590,7 @@ class SplitsView extends WatchUi.DataField {
                     dc.setPenWidth(2);
                     var lx0 = (_w * 0.12).toNumber();
                     var lx1 = _lactateEnabled ? (_w * 0.76).toNumber() : (_w * 0.88).toNumber();
-                    var ly = (ys[i] - _h * 0.085).toNumber();
+                    var ly = ((ys[i - 1] + ys[i]) / 2).toNumber();   // живой круг не выше центра: i >= 2
                     dc.drawLine(lx0, ly, lx1, ly);
                     dc.setPenWidth(1);
                 }
@@ -597,7 +601,9 @@ class SplitsView extends WatchUi.DataField {
 
     // строка карусели одним блоком по центру; active=true — центр, крупнее и без номера отрезка (избыточен)
     function drawRowFont(dc, it, y, font, active) {
-        var cx = listCx();
+        // плашка зоны переключения — только на средней полосе, поэтому от неё уходит одна центральная строка;
+        // остальные, сдвинутые влево, вылезали за левый край круга (TSV-27)
+        var cx = active ? listCx() : _w / 2;
         if (it[0] == 0) {
             var head = fmtTime(it[2]) + "  " + fmtDist(it[3]) + "  ";
             if (!active) { head = it[1].format("%d") + "  " + head; }
