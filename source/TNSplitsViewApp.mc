@@ -338,8 +338,12 @@ class SplitsView extends WatchUi.DataField {
         _fBig = WatchUi.loadResource(Rez.Fonts.Big);
     }
 
+    // круг от часа — часы и минуты без секунд («1h05»): «65:00» и «120:00» шире пяти знаков и в списке MIN доходили
+    // до номера круга (TSV-29)
     function fmtTime(sec) {
-        var s = sec.toNumber(); return (s/60).format("%d") + ":" + (s%60).format("%02d");
+        var s = sec.toNumber();
+        if (s >= 3600) { return (s/3600).format("%d") + "h" + (s%3600/60).format("%02d"); }
+        return (s/60).format("%d") + ":" + (s%60).format("%02d");
     }
     function fmtPace(p) {
         if (p <= 0) { return "--"; }
@@ -575,13 +579,11 @@ class SplitsView extends WatchUi.DataField {
         var right = Graphics.TEXT_JUSTIFY_RIGHT;
         if (it[0] == 0) {
             var live = (it[5] == -1);
-            var sec = it[2];
-            // время от 10:00 доходит до номера и слипается с ним («10152:30»), а сдвинуть номер некуда: у крайних
-            // строк он уже у края круглого экрана. Номер такого круга виден в MID и MAX (TSV-26)
-            if (sec < 600) {
-                txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
-            }
-            txt(dc, cx - sc(22), y, _fRow, fmtTime(sec), _fg, right);
+            // номер на 8 px макета левее прежнего: время до пяти знаков («52:30») отходит от него на 10 px (на мелких
+            // экранах на 5–8), а не слипается («10152:30»). На целый знак нельзя: трёхзначный номер в верхней и нижней строке
+            // срезался бы краем круглого экрана (TSV-29)
+            txt(dc, cx - sc(112), y, _fRow, it[1].format("%d"), _dim, right);
+            txt(dc, cx - sc(22), y, _fRow, fmtTime(it[2]), _fg, right);
             txt(dc, cx + sc(62), y, _fRow, fmtDistRow(it[3]), _dim, right);
             txt(dc, cx + sc(150), y, _fRow, fmtPaceU(it[4]), live ? _fg : colorFor(it[4]), right);
         } else {
@@ -599,8 +601,8 @@ class SplitsView extends WatchUi.DataField {
     function drawCarousel(dc) {
         var center = _topIndex;
         // крайние строки не выше 25% высоты: выше строка сотого круга ультра «100  10:30  1.00  10:30» шире круглого
-        // экрана (самому тесному, 360, нужно 23,8%); шаг между строками ровный. Круг от 100 минут или от 10 км не влезет
-        // и так (TSV-27)
+        // экрана (самому тесному, 360, нужно 23,8%); шаг между строками ровный (TSV-27). Шире эта строка только у круга
+        // от 100 км («100.0»): время не длиннее пяти знаков («1h05», TSV-29), дистанция от 10 км — четырёх (TSV-28)
         var ys = [ _h * 0.25, _h * 0.375, _h * 0.50, _h * 0.625, _h * 0.75 ];
         var off = [ -2, -1, 0, 1, 2 ];
         for (var i = 0; i < 5; i += 1) {
@@ -633,7 +635,8 @@ class SplitsView extends WatchUi.DataField {
             var sep = "  ";
             // с лактатом центральная строка сдвинута влево от плашки, и от 17 знаков (время или темп от 10:00) её начало
             // уходит за край круга — тогда поля через один пробел. Порог sc(4): 16 знаков начинаются в 3–13 px от края,
-            // 17 — в -6…2. Потолок — круг от 100 минут и темп от 10:00: 17 знаков и через один пробел (TSV-30)
+            // 17 — в -6…2. Потолок — круг от 100 км и темп от 10:00: 17 знаков и через один пробел (TSV-30; круг от часа —
+            // «1h05», не длиннее пяти знаков, TSV-29)
             if (active && dc.getTextWidthInPixels(t + sep + d + sep + pace, font) / 2 > cx - sc(4)) { sep = " "; }
             var head = t + sep + d + sep;
             if (!active) { head = it[1].format("%d") + "  " + head; }
