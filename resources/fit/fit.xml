@@ -7,4 +7,10 @@
               dataLabel="@Strings.LactateLabel"
               unitLabel="@Strings.LactateUnits"
               fillColor="#33CCFF" />
+    <fitField id="2"
+              displayInActivitySummary="true"
+              sortOrder="1"
+              precision="1"
+              dataLabel="@Strings.LactateStopLabel"
+              unitLabel="@Strings.LactateUnits" />
 </fitContributions>
