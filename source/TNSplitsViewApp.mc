@@ -9,11 +9,21 @@ using Toybox.FitContributor;
 function rowsForMode(m) {            // 0=min,1=med,2=max
     if (m == 2) { return 1; }
     if (m == 1) { return 5; }       // MID — карусель 5 строк, центр активный
-    return 8;
+    return 11;                      // MIN — шаг строк 30 px на экране 454, как на циферблате (TSV-18)
 }
 
-// палитра цветов по индексу (0..6)
-function paletteColor(idx) {
+// палитра цветов по индексу (0..6); light — светлая тема (TSV-18): на белом фоне жёлтый и оранжевый
+// затемнены, «белый» зоны — чёрный (иначе пропал бы)
+function paletteColor(idx, light) {
+    if (light) {
+        if (idx == 0) { return 0x000000; }   // «белый» → чёрный
+        if (idx == 1) { return 0x0086C8; }   // голубой
+        if (idx == 2) { return 0x008A00; }   // зелёный
+        if (idx == 3) { return 0xB08A00; }   // жёлтый (самый слабый по контрасту на белом)
+        if (idx == 4) { return 0xD95F00; }   // оранжевый
+        if (idx == 5) { return 0xD00000; }   // красный
+        return 0x8A2BE2;                     // 6 = фиолетовый
+    }
     if (idx == 0) { return 0xFFFFFF; }   // белый
     if (idx == 1) { return 0x33CCFF; }   // голубой
     if (idx == 2) { return 0x00DD00; }   // зелёный
@@ -70,6 +80,11 @@ class SplitsView extends WatchUi.DataField {
     var _col;              // массив 7 цветов (0xRRGGBB)
     var _settingsError;    // строка ошибки парсинга или null
     var _useMiles;         // системные единицы: true=мили
+
+    // тема (TSV-18): цвета фона, основного и второстепенного текста, линий; шрифты — Courier Prime Bold
+    var _light;            // true = светлая тема (белый фон)
+    var _bg; var _fg; var _dim; var _line;
+    var _fRow; var _fKey; var _fBig;
 
     // режим: 0 = список, 1 = ввод лактата
     var _mode;
@@ -168,18 +183,24 @@ class SplitsView extends WatchUi.DataField {
             }
         }
 
+        // тема: 0 = тёмная (по умолчанию, как было), 1 = светлая с белым фоном
+        var th = Application.Properties.getValue("theme");
+        _light = (th != null && th == 1);
+        if (_light) { _bg = 0xFFFFFF; _fg = 0x000000; _dim = 0x6A6A6A; _line = 0xC4C4C4; }
+        else        { _bg = 0x000000; _fg = 0xDCDCDC; _dim = 0x7A7A7A; _line = 0x3A3A3A; }
+
         // цвета 7 зон
         _col = new [7];
         var ckeys = ["color1","color2","color3","color4","color5","color6","color7"];
         for (var j = 0; j < 7; j += 1) {
             var ci = Application.Properties.getValue(ckeys[j]);
-            _col[j] = paletteColor((ci == null) ? 0 : ci);
+            _col[j] = paletteColor((ci == null) ? 0 : ci, _light);
         }
     }
 
     // цвет по темпу (сек/км) на основе настроенных порогов/цветов
     function colorFor(paceSec) {
-        if (paceSec <= 0) { return 0xFFFFFF; }
+        if (paceSec <= 0) { return _fg; }
         for (var i = 0; i < 6; i += 1) {
             if (paceSec < _thr[i]) { return _col[i]; }
         }
@@ -210,11 +231,12 @@ class SplitsView extends WatchUi.DataField {
             return;
         }
         // MIN: _topIndex = индекс нижней видимой строки (окно)
+        // TSV-18: окно упирается вниз — живой круг в нижней строке, как в макете; раньше живая строка
+        // стояла посередине окна, а нижняя половина оставалась пустой
         var rows = rowsForMode(_fontMode);
-        var half = (rows - 1) / 2;
-        var lo = half;
-        var hi = nItems() - 1 + half;
-        if (hi < lo) { hi = lo; }
+        var hi = nItems() - 1;
+        var lo = rows - 1;
+        if (lo > hi) { lo = hi; }
         if (_topIndex < lo) { _topIndex = lo; }
         if (_topIndex > hi) { _topIndex = hi; }
     }
@@ -291,7 +313,12 @@ class SplitsView extends WatchUi.DataField {
 
     function pageOlder() { _topIndex -= 1; clampTop(); }
     function pageNewer() { _topIndex += 1; clampTop(); }
-    function onLayout(dc) { _w = dc.getWidth(); _h = dc.getHeight(); }
+    function onLayout(dc) {
+        _w = dc.getWidth(); _h = dc.getHeight();
+        _fRow = WatchUi.loadResource(Rez.Fonts.Row);
+        _fKey = WatchUi.loadResource(Rez.Fonts.Key);
+        _fBig = WatchUi.loadResource(Rez.Fonts.Big);
+    }
 
     function fmtTime(sec) {
         var s = sec.toNumber(); return (s/60).format("%d") + ":" + (s%60).format("%02d");
@@ -405,7 +432,8 @@ class SplitsView extends WatchUi.DataField {
 
     // ——— отрисовка ———
     function onUpdate(dc) {
-        if (_w == 0) { _w = dc.getWidth(); _h = dc.getHeight(); }
+        if (_fRow == null) { onLayout(dc); }
+        if (dc has :setAntiAlias) { dc.setAntiAlias(true); }   // API 4.2+; на 4.1 — без сглаживания
         if (_settingsError != null) { drawError(dc); return; }
         if (_mode == 1) { drawInput(dc); }
         else { drawList(dc); }
@@ -423,12 +451,42 @@ class SplitsView extends WatchUi.DataField {
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 
+    // ——— оформление TSV-18: язык циферблата TN Watch Face ———
+    // Один шрифт (Courier Prime Bold трёх размеров, tools/make_fonts.py), цвет несёт только смысл (темп, лактат),
+    // остальное — основной и серый текст. Раскладка в пикселях макета 454 (design/mockup.html), sc() переводит её
+    // в пиксели экрана. Потолок: DIGIT_H — высоты цифр шрифтов на 454 (вывод make_fonts.py); сменишь размеры шрифтов —
+    // поправь и их.
+    function sc(v) { return (v * _w / 454.0 + 0.5).toNumber(); }
+
+    // текст по середине цифр: y — середина строки, justify — только по горизонтали
+    function txt(dc, x, y, font, s, color, justify) {
+        var dh = sc(font == _fBig ? 40 : (font == _fKey ? 23 : 15));
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(x, y + dh / 2 - Graphics.getFontAscent(font), font, s, justify);
+    }
+
+    // капля (вместо эмодзи: в Courier Prime его нет): круг снизу и треугольник, касательный к нему, сверху
+    function drop(dc, x, y, h, color) {
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.fillCircle(x, y + h * 0.25, h * 0.35);
+        dc.fillPolygon([ [x, y - h * 0.5], [x - h * 0.309, y + h * 0.087], [x + h * 0.309, y + h * 0.087] ]);
+    }
+
+    // стрелка-уголок вправо (dir = 1) или влево (dir = -1)
+    function chevron(dc, x, y, dir, color) {
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.setPenWidth(sc(3));
+        dc.drawLine(x - sc(4) * dir, y - sc(8), x + sc(4) * dir, y);
+        dc.drawLine(x + sc(4) * dir, y, x - sc(4) * dir, y + sc(8));
+        dc.setPenWidth(1);
+    }
+
     function drawList(dc) {
         clampTop();
-        dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK); dc.clear();
+        dc.setColor(_fg, _bg); dc.clear();
 
         if (_tapFlash > 0) {
-            dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(_dim, Graphics.COLOR_TRANSPARENT);
             dc.fillRectangle(0, 0, _w, (_h*0.013).toNumber());
             _tapFlash -= 1;
         }
@@ -440,21 +498,23 @@ class SplitsView extends WatchUi.DataField {
             drawCard(dc, itemAt(idx));
         } else if (_fontMode == 1) {              // MID — карусель 5 строк, центр активный
             drawCarousel(dc);
-        } else {                                  // MIN — 8 строк
+        } else {                                  // MIN — 11 строк
             var rows = rowsForMode(_fontMode);
-            var font = Graphics.FONT_SMALL;
-            var rowH = _h / rows; var i = 0;
+            var pitch = sc(30);
+            var y0 = _h / 2 - pitch * (rows - 1) / 2;
+            var i = 0;
             while (i < rows) {
                 var idx = _topIndex - (rows - 1 - i);
                 if (idx >= 0 && idx < nItems()) {
-                    var yc = (i * rowH) + (rowH / 2);
-                    if (idx == nItems() - 1) {
-                        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-                        var lx0 = (_w * 0.10).toNumber();
-                        var lx1 = _lactateEnabled ? (_w * 0.78).toNumber() : (_w * 0.90).toNumber();
-                        dc.drawLine(lx0, (i * rowH).toNumber(), lx1, (i * rowH).toNumber());
+                    var yc = y0 + i * pitch;
+                    if (idx == nItems() - 1) {      // линия над живым кругом
+                        dc.setColor(_line, Graphics.COLOR_TRANSPARENT);
+                        dc.setPenWidth(2);
+                        var ly = yc - pitch / 2;
+                        dc.drawLine(sc(58), ly, _lactateEnabled ? _w - zoneW() - sc(8) : _w - sc(58), ly);
+                        dc.setPenWidth(1);
                     }
-                    drawRow(dc, itemAt(idx), yc, font);
+                    drawRow(dc, itemAt(idx), yc);
                 }
                 i += 1;
             }
@@ -480,188 +540,143 @@ class SplitsView extends WatchUi.DataField {
         return _w / 2;
     }
 
-    function drawRow(dc, it, y, font) {
+    // строка MIN: колонки по правому краю — номер, время, дистанция, темп; замер лактата — в тех же колонках
+    function drawRow(dc, it, y) {
+        var cx = listCx();
+        var right = Graphics.TEXT_JUSTIFY_RIGHT;
         if (it[0] == 0) {
-            // лап (живой круг it[5]==-1 — белым, записанные — по темпу)
-            if (it[5] == -1) { dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT); }
-            else { dc.setColor(colorFor(it[4]), Graphics.COLOR_TRANSPARENT); }
-            var line;
-            if (_fontMode == 0) {
-                line = it[1].format("%d") + "  " + fmtTime(it[2]) + "  "
-                     + fmtDist(it[3]) + "  " + fmtPaceU(it[4]);
-            } else {
-                line = it[1].format("%d") + "  " + fmtTime(it[2]) + "  "
-                     + fmtDist(it[3]);
-            }
-            if (_fontMode == 0) {
-                dc.drawText((_w*0.02).toNumber(), y, font, line,
-                    Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
-            } else {
-                dc.drawText(listCx(), y, font, line,
-                    Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            }
+            var live = (it[5] == -1);
+            txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
+            txt(dc, cx - sc(22), y, _fRow, fmtTime(it[2]), _fg, right);
+            txt(dc, cx + sc(62), y, _fRow, fmtDist(it[3]), _dim, right);
+            txt(dc, cx + sc(150), y, _fRow, fmtPaceU(it[4]), live ? _fg : colorFor(it[4]), right);
         } else {
-            // лактат: 💧 значение  время
-            dc.setColor(0x33CCFF, Graphics.COLOR_TRANSPARENT);
-            var v = (it[1]/10).format("%d") + "," + (it[1]%10).format("%d");
-            var line = "💧 " + v + "  " + fmtClock(it[2]);
-            if (_fontMode == 0) {
-                dc.drawText((_w*0.02).toNumber(), y, font, line,
-                    Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
-            } else {
-                dc.drawText(listCx(), y, font, line,
-                    Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            }
+            var c = paletteColor(1, _light);
+            drop(dc, cx - sc(118), y, sc(22), c);
+            txt(dc, cx - sc(22), y, _fRow, valOf(it[1]), c, right);
+            txt(dc, cx + sc(150), y, _fRow, fmtClock(it[2]), _dim, right);
         }
     }
+
+    function valOf(v10) { return (v10/10).format("%d") + "," + (v10%10).format("%d"); }
 
     // MID-карусель: 5 строк, центр (_topIndex) — активный/крупный, к краям мельче.
     // Центрируем имеющиеся: активная запись всегда по центру, пустые слоты пусты.
     function drawCarousel(dc) {
         var center = _topIndex;
         var ys = [ _h * 0.13, _h * 0.30, _h * 0.50, _h * 0.70, _h * 0.87 ];
-        var fonts = [
-            Graphics.FONT_TINY,    // 1 край
-            Graphics.FONT_SMALL,   // 2
-            Graphics.FONT_MEDIUM,  // 3 центр (активный) — крупная
-            Graphics.FONT_SMALL,   // 4
-            Graphics.FONT_TINY     // 5 край
-        ];
         var off = [ -2, -1, 0, 1, 2 ];
         for (var i = 0; i < 5; i += 1) {
             var idx = center + off[i];
             if (idx >= 0 && idx < nItems()) {
+                var y = ys[i].toNumber();
                 // линия над живым треком (последний индекс)
                 if (idx == nItems() - 1) {
-                    dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+                    dc.setColor(_line, Graphics.COLOR_TRANSPARENT);
+                    dc.setPenWidth(2);
                     var lx0 = (_w * 0.12).toNumber();
                     var lx1 = _lactateEnabled ? (_w * 0.76).toNumber() : (_w * 0.88).toNumber();
                     var ly = (ys[i] - _h * 0.085).toNumber();
                     dc.drawLine(lx0, ly, lx1, ly);
+                    dc.setPenWidth(1);
                 }
-                drawRowFont(dc, itemAt(idx), ys[i], fonts[i], off[i] == 0);
+                drawRowFont(dc, itemAt(idx), y, off[i] == 0 ? _fKey : _fRow, off[i] == 0);
             }
         }
     }
 
-    // строка с заданным шрифтом; active=true подсвечивает центр
+    // строка карусели одним блоком по центру; active=true — центр, крупнее и без номера отрезка (избыточен)
     function drawRowFont(dc, it, y, font, active) {
-        if (it[0] == 0) {
-            if (it[5] == -1) { dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT); }
-            else { dc.setColor(colorFor(it[4]), Graphics.COLOR_TRANSPARENT); }
-            var line;
-            if (active) {
-                // центральная (активная) строка — без номера отрезка (избыточен)
-                line = fmtTime(it[2]) + "  "
-                     + fmtDist(it[3]) + "  " + fmtPaceU(it[4]);
-            } else {
-                line = it[1].format("%d") + "  " + fmtTime(it[2]) + "  "
-                     + fmtDist(it[3]) + "  " + fmtPaceU(it[4]);
-            }
-            dc.drawText(listCx(), y, font, line,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        } else {
-            dc.setColor(0x33CCFF, Graphics.COLOR_TRANSPARENT);
-            var v = (it[1]/10).format("%d") + "," + (it[1]%10).format("%d");
-            var line = "💧 " + v + "  " + fmtClock(it[2]);
-            dc.drawText(listCx(), y, font, line,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        }
-    }
-
-    function drawCard(dc, it) {
         var cx = listCx();
         if (it[0] == 0) {
-            if (it[5] == -1) { dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT); }
-            else { dc.setColor(colorFor(it[4]), Graphics.COLOR_TRANSPARENT); }
-            // номер отрезка — самый мелкий шрифт, отдельной строкой
-            dc.drawText(cx, _h * 0.20, Graphics.FONT_XTINY,
-                it[1].format("%d"),
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            // время — отдельной строкой
-            dc.drawText(cx, _h * 0.40, Graphics.FONT_NUMBER_MILD,
-                fmtTime(it[2]),
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            dc.drawText(cx, _h * 0.62, Graphics.FONT_MEDIUM,
-                fmtDist(it[3]) + " " + distUnit(),
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            dc.drawText(cx, _h * 0.78, Graphics.FONT_MEDIUM,
-                fmtPaceU(it[4]) + " /" + distUnit(),
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+            var head = fmtTime(it[2]) + "  " + fmtDist(it[3]) + "  ";
+            if (!active) { head = it[1].format("%d") + "  " + head; }
+            var pace = fmtPaceU(it[4]);
+            var x = cx - (dc.getTextWidthInPixels(head, font) + dc.getTextWidthInPixels(pace, font)) / 2;
+            txt(dc, x, y, font, head, _fg, Graphics.TEXT_JUSTIFY_LEFT);
+            txt(dc, x + dc.getTextWidthInPixels(head, font), y, font, pace,
+                it[5] == -1 ? _fg : colorFor(it[4]), Graphics.TEXT_JUSTIFY_LEFT);
         } else {
-            dc.setColor(0x33CCFF, Graphics.COLOR_TRANSPARENT);
-            var v = (it[1]/10).format("%d") + "," + (it[1]%10).format("%d");
-            dc.drawText(cx, _h * 0.35, Graphics.FONT_NUMBER_MILD,
-                "LA: " + v,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            dc.drawText(cx, _h * 0.62, Graphics.FONT_MEDIUM,
-                fmtClock(it[2]),
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+            var c = paletteColor(1, _light);
+            var v = valOf(it[1]);
+            var clock = "  " + fmtClock(it[2]);
+            var dh = sc(active ? 30 : 22);
+            var x = cx - (dh + dc.getTextWidthInPixels(v, font) + dc.getTextWidthInPixels(clock, font)) / 2;
+            drop(dc, x + dh / 2, y, dh, c);
+            txt(dc, x + dh, y, font, v, c, Graphics.TEXT_JUSTIFY_LEFT);
+            txt(dc, x + dh + dc.getTextWidthInPixels(v, font), y, font, clock, _dim, Graphics.TEXT_JUSTIFY_LEFT);
+        }
+    }
+
+    // MAX-карточка: один круг или замер крупно
+    function drawCard(dc, it) {
+        var cx = listCx();
+        var mid = Graphics.TEXT_JUSTIFY_CENTER;
+        if (it[0] == 0) {
+            txt(dc, cx, (_h * 0.20).toNumber(), _fRow, it[1].format("%d"), _dim, mid);
+            txt(dc, cx, (_h * 0.40).toNumber(), _fBig, fmtTime(it[2]), _fg, mid);
+            txt(dc, cx, (_h * 0.62).toNumber(), _fKey, fmtDist(it[3]) + " " + distUnit(), _fg, mid);
+            txt(dc, cx, (_h * 0.78).toNumber(), _fKey, fmtPaceU(it[4]) + " /" + distUnit(),
+                it[5] == -1 ? _fg : colorFor(it[4]), mid);
+        } else {
+            var c = paletteColor(1, _light);
+            drop(dc, cx, (_h * 0.22).toNumber(), sc(40), c);
+            txt(dc, cx, (_h * 0.40).toNumber(), _fBig, valOf(it[1]), c, mid);
+            txt(dc, cx, (_h * 0.62).toNumber(), _fKey, fmtClock(it[2]), _dim, mid);
         }
     }
 
     function drawRightSwitch(dc) {
         var bw = zoneW();
-        // компактный квадрат по центру правого края (касание зарезервировано на всю высоту в handleListTap)
-        var halfH = (_h * 0.10).toNumber();
-        dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(_w - bw, _h/2 - halfH, bw, halfH * 2);
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(_w - bw/2, _h/2 - (_h*0.03).toNumber(), Graphics.FONT_SMALL, "💧",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.drawText(_w - bw/2, _h/2 + (_h*0.035).toNumber(), Graphics.FONT_SMALL, ">",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        // компактная плашка по центру правого края (касание зарезервировано на всю высоту в handleListTap)
+        dc.setColor(_line, Graphics.COLOR_TRANSPARENT);
+        dc.setPenWidth(sc(3));
+        dc.drawRoundedRectangle(_w - bw + sc(14), _h / 2 - sc(45), bw - sc(14) + sc(4), sc(90), sc(16));
+        dc.setPenWidth(1);
+        drop(dc, _w - bw / 2 + sc(7), _h / 2 - sc(16), sc(24), _fg);
+        chevron(dc, _w - bw / 2 + sc(7), _h / 2 + sc(24), 1, _fg);
     }
 
+    // ввод: зоны те же (3×2), но без заливок — линии, «+»/«-» цветом текста, OK — единственная плотная плашка
     function drawInput(dc) {
         var cw = _w/3; var rh = _h/2;
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK); dc.clear();
+        dc.setColor(_fg, _bg); dc.clear();
 
-        // зелёные плюс-зоны
-        dc.setColor(0x00AA00, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(0, 0, cw, rh);
-        dc.fillRectangle(2*cw, 0, cw, rh);
-        // красные минус-зоны
-        dc.setColor(0xCC0000, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(0, rh, cw, rh);
-        dc.fillRectangle(2*cw, rh, cw, rh);
-        // белый OK
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(cw, rh, cw, rh);
+        dc.setColor(_line, Graphics.COLOR_TRANSPARENT);
+        dc.setPenWidth(2);
+        dc.drawLine(cw, sc(60), cw, _h - sc(60));
+        dc.drawLine(2*cw, sc(60), 2*cw, _h - sc(60));
+        dc.drawLine(sc(40), rh, _w - sc(40), rh);
+        dc.setPenWidth(1);
 
-        // подписи прижаты к центру экрана:
-        // верхние (+1,+0.1) — в нижнюю треть своей зоны; нижние (-1,-0.1,OK) — в верхнюю треть
-        var topY = (rh * 0.72).toNumber();      // нижняя треть верхнего ряда
-        var botY = (rh + rh * 0.28).toNumber(); // верхняя треть нижнего ряда
+        // подписи прижаты к центру экрана: верхние (+1,+0,1) — в нижнюю треть своей зоны, нижние — в верхнюю
+        var topY = (rh * 0.72).toNumber();
+        var botY = (rh + rh * 0.28).toNumber();
+        var up = paletteColor(2, _light);
+        var down = paletteColor(5, _light);
+        var mid = Graphics.TEXT_JUSTIFY_CENTER;
+        txt(dc, cw/2 + sc(10), topY, _fKey, "+1", up, mid);
+        txt(dc, 2*cw + cw/2 - sc(10), topY, _fKey, "+0,1", up, mid);
+        txt(dc, cw/2 + sc(10), botY, _fKey, "-1", down, mid);
+        txt(dc, 2*cw + cw/2 - sc(10), botY, _fKey, "-0,1", down, mid);
 
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cw/2,      topY, Graphics.FONT_MEDIUM, "+1",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.drawText(2*cw+cw/2, topY, Graphics.FONT_MEDIUM, "+0,1",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.drawText(cw/2,      botY, Graphics.FONT_MEDIUM, "-1",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.drawText(2*cw+cw/2, botY, Graphics.FONT_MEDIUM, "-0,1",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cw+cw/2, botY, Graphics.FONT_MEDIUM, "OK",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        // значение — в нижнюю треть верхнего ряда (к центру), над ним капля
+        drop(dc, cw + cw/2, (rh * 0.30).toNumber(), sc(26), paletteColor(1, _light));
+        txt(dc, cw + cw/2, topY - sc(4), _fBig, valStr(), _fg, mid);
 
-        // значение белым на чёрном — тоже в нижнюю треть верхнего ряда (к центру)
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cw+cw/2, topY, Graphics.FONT_NUMBER_MEDIUM, valStr(),
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        // OK — светлая (в тёмной теме) или чёрная (в светлой) плашка
+        dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
+        dc.fillRoundedRectangle(cw + sc(14), rh + sc(14), cw - sc(28), (rh * 0.5).toNumber(), sc(24));
+        txt(dc, cw + cw/2, rh + sc(14) + (rh * 0.25).toNumber(), _fKey, "OK", _bg, mid);
 
-        // левый край — возврат 🔁 < (доли вместо пикселей)
+        // левый край — возврат: капля и стрелка влево
         var bw = zoneW();
-        var halfH = (_h * 0.10).toNumber();
-        dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(0, rh - halfH, bw, halfH * 2);
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(bw/2, rh - (_h*0.03).toNumber(), Graphics.FONT_SMALL, "🔁",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.drawText(bw/2, rh + (_h*0.035).toNumber(), Graphics.FONT_SMALL, "<",
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        dc.setColor(_line, Graphics.COLOR_TRANSPARENT);
+        dc.setPenWidth(sc(3));
+        dc.drawRoundedRectangle(-sc(20), rh - sc(45), bw + sc(6), sc(90), sc(16));
+        dc.setPenWidth(1);
+        chevron(dc, bw / 2 - sc(7), rh - sc(24), -1, _fg);
+        drop(dc, bw / 2 - sc(7), rh + sc(16), sc(24), _fg);
     }
 }
 

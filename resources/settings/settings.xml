@@ -3,6 +3,13 @@
         <settingConfig type="boolean" />
     </setting>
 
+    <setting propertyKey="@Properties.theme" title="@Strings.SetTheme" prompt="@Strings.SetThemePrompt">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ThemeDark</listEntry>
+            <listEntry value="1">@Strings.ThemeLight</listEntry>
+        </settingConfig>
+    </setting>
+
     <setting propertyKey="@Properties.listMode" title="@Strings.SetListMode" prompt="@Strings.SetListModePrompt">
         <settingConfig type="list">
             <listEntry value="0">@Strings.ListMin</listEntry>
