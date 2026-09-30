@@ -74,6 +74,8 @@ class SplitsView extends WatchUi.DataField {
     var _touchOn;          // тач есть физически И включён настройкой
     var _cycleSec;         // интервал автоцикла (сек)
     var _cycleAccum;       // накопитель секунд для автоцикла
+    var _lapCount;         // номер последнего закрытого круга: ранние круги могут уйти из списка (addItem)
+    const RESERVE = 1536;  // байт свободной памяти, которые список оставляет полю (addItem, TSV-25)
 
     // настройки порогов/цветов
     var _thr;              // массив 6 порогов в сек/км (канонический формат)
@@ -110,6 +112,7 @@ class SplitsView extends WatchUi.DataField {
         _touchOn = true; _cycleSec = 5; _cycleAccum = 0;
         _val10 = 20; _pending = 0; _holdSec = 0; _savedFlash = 0;
         _sessionStr = "";
+        _lapCount = 0;
         reloadSettings();
 
         if (_lactateEnabled) {
@@ -218,8 +221,8 @@ class SplitsView extends WatchUi.DataField {
     // вернуть запись по индексу: реальные лапы из _items, последний индекс — живой круг
     function itemAt(idx) {
         if (idx < _items.size()) { return _items[idx]; }
-        // виртуальная живая строка: type 0, номер = countLaps()+1, маркер времени -1
-        return [ 0, countLaps() + 1, _curLapTime, _curLapDist, _curLapPace, -1 ];
+        // виртуальная живая строка: type 0, номер = следующий за последним закрытым, маркер времени -1
+        return [ 0, _lapCount + 1, _curLapTime, _curLapDist, _curLapPace, -1 ];
     }
 
     function clampTop() {
@@ -252,8 +255,8 @@ class SplitsView extends WatchUi.DataField {
         var lapDist = dM - _lastDistM;
         var pace = 0.0;
         if (lapDist > 0) { pace = lapTime / (lapDist / 1000.0); }
-        var lapNum = countLaps() + 1;
-        _items.add([ 0, lapNum, lapTime, lapDist, pace, tMs ]);
+        _lapCount += 1;
+        addItem([ 0, _lapCount, lapTime, lapDist, pace, tMs ]);
         _lastTimeMs = tMs; _lastDistM = dM;
         // новый круг стартует с нуля
         _curLapTime = 0.0; _curLapDist = 0.0; _curLapPace = 0.0;
@@ -262,12 +265,14 @@ class SplitsView extends WatchUi.DataField {
         WatchUi.requestUpdate();
     }
 
-    function countLaps() {
-        var n = 0;
-        for (var i = 0; i < _items.size(); i += 1) {
-            if (_items[i][0] == 0) { n += 1; }
-        }
-        return n;
+    // TSV-25: часы с 32 КБ под поле (fēnix 6/6S, fr245, fr645, fr935, fr735xt) дают ему 28,4 КиБ, пустое поле занимает
+    // около 25, запись круга — 61 байт, и в симуляторе поле падало при отрисовке на 38–52 кругах. Поэтому новая запись
+    // вытесняет самые ранние (в файле тренировки они остаются), пока свободно меньше RESERVE: запас на пик отрисовки
+    // (в симуляторе до 0,4 КиБ) и перечитывание настроек. Правило смотрит на память самих часов, а не на число кругов,
+    // подобранное в симуляторе; на часах с 64 КБ и больше до вытеснения не доходит.
+    function addItem(it) {
+        _items.add(it);
+        while (_items.size() > 1 && System.getSystemStats().freeMemory < RESERVE) { _items.remove(_items[0]); }
     }
 
     function compute(info) {
@@ -374,7 +379,7 @@ class SplitsView extends WatchUi.DataField {
         _pending = _val10;
         _holdSec = 10;   // держать значение 10с, чтобы пережить прореживание потока
         // в список как отдельная строка
-        _items.add([ 1, _val10, tMs, 0, 0, tMs ]);
+        addItem([ 1, _val10, tMs, 0, 0, tMs ]);
         _savedFlash = 4;
         // вернуться в список и показать свежую отметку
         _mode = 0;
@@ -433,7 +438,7 @@ class SplitsView extends WatchUi.DataField {
     // ——— отрисовка ———
     function onUpdate(dc) {
         if (_fRow == null) { onLayout(dc); }
-        if (dc has :setAntiAlias) { dc.setAntiAlias(true); }   // API 3.2+ по документации SDK (TSV-24) — есть у всех моделей манифеста; has — страховка
+        if (dc has :setAntiAlias) { dc.setAntiAlias(true); }   // API 3.2+ по документации SDK (TSV-24); has обязателен: fr645, fr935 (3.1) и fr735xt (2.4) его не имеют (TSV-25)
         if (_settingsError != null) { drawError(dc); return; }
         if (_mode == 1) { drawInput(dc); }
         else { drawList(dc); }
