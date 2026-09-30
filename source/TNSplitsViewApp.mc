@@ -341,6 +341,15 @@ class SplitsView extends WatchUi.DataField {
         return (meters / 1000.0).format("%.2f");
     }
 
+    // дистанция в строке списка (MIN, MID) не длиннее четырёх знаков: пятый («13.05») доводит её в MIN до колонки
+    // времени — «120:0013.05», а строку карусели делает шире круглого экрана. Сотые отбрасываются, а не округляются,
+    // как у Garmin; округление сделало бы из 9,996 «10.00». Потолок — круг от 100 км («100.0»). Карточка MAX
+    // пишет полную дистанцию (TSV-28)
+    function fmtDistRow(meters) {
+        var s = fmtDist(meters);
+        return s.length() > 4 ? s.substring(0, s.length() - 1) : s;
+    }
+
     // темп (сек/км канон) в системных единицах: мин:сек на км или на милю
     function fmtPaceU(paceSecPerKm) {
         if (paceSecPerKm <= 0) { return "--"; }
@@ -560,7 +569,7 @@ class SplitsView extends WatchUi.DataField {
                 txt(dc, cx - sc(104), y, _fRow, it[1].format("%d"), _dim, right);
             }
             txt(dc, cx - sc(22), y, _fRow, fmtTime(sec), _fg, right);
-            txt(dc, cx + sc(62), y, _fRow, fmtDist(it[3]), _dim, right);
+            txt(dc, cx + sc(62), y, _fRow, fmtDistRow(it[3]), _dim, right);
             txt(dc, cx + sc(150), y, _fRow, fmtPaceU(it[4]), live ? _fg : colorFor(it[4]), right);
         } else {
             var c = paletteColor(1, _light);
@@ -606,7 +615,7 @@ class SplitsView extends WatchUi.DataField {
         // остальные, сдвинутые влево, вылезали за левый край круга (TSV-27)
         var cx = active ? listCx() : _w / 2;
         if (it[0] == 0) {
-            var head = fmtTime(it[2]) + "  " + fmtDist(it[3]) + "  ";
+            var head = fmtTime(it[2]) + "  " + fmtDistRow(it[3]) + "  ";
             if (!active) { head = it[1].format("%d") + "  " + head; }
             var pace = fmtPaceU(it[4]);
             var x = cx - (dc.getTextWidthInPixels(head, font) + dc.getTextWidthInPixels(pace, font)) / 2;
