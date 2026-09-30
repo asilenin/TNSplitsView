@@ -433,7 +433,7 @@ class SplitsView extends WatchUi.DataField {
     // ——— отрисовка ———
     function onUpdate(dc) {
         if (_fRow == null) { onLayout(dc); }
-        if (dc has :setAntiAlias) { dc.setAntiAlias(true); }   // API 4.2+; на 4.1 — без сглаживания
+        if (dc has :setAntiAlias) { dc.setAntiAlias(true); }   // API 3.2+ по документации SDK (TSV-24) — есть у всех моделей манифеста; has — страховка
         if (_settingsError != null) { drawError(dc); return; }
         if (_mode == 1) { drawInput(dc); }
         else { drawList(dc); }

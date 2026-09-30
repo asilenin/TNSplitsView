@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
-    <iq:application id="7c294f6c-58ec-4064-bcfe-342189d548f0" type="datafield" name="@Strings.AppName" entry="SplitsApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.1.0">
+    <iq:application id="7c294f6c-58ec-4064-bcfe-342189d548f0" type="datafield" name="@Strings.AppName" entry="SplitsApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0">
         <iq:products>
             <iq:product id="approachs50"/>
             <iq:product id="approachs7042mm"/>
@@ -17,6 +17,9 @@
             <iq:product id="epix2pro42mm"/>
             <iq:product id="epix2pro47mm"/>
             <iq:product id="epix2pro51mm"/>
+            <iq:product id="fenix6pro"/>
+            <iq:product id="fenix6spro"/>
+            <iq:product id="fenix6xpro"/>
             <iq:product id="fenix7"/>
             <iq:product id="fenix7pro"/>
             <iq:product id="fenix7pronowifi"/>
@@ -42,6 +45,7 @@
             <iq:product id="fr165m"/>
             <iq:product id="fr170"/>
             <iq:product id="fr170m"/>
+            <iq:product id="fr245m"/>
             <iq:product id="fr255"/>
             <iq:product id="fr255m"/>
             <iq:product id="fr255s"/>
@@ -50,7 +54,11 @@
             <iq:product id="fr265s"/>
             <iq:product id="fr57042mm"/>
             <iq:product id="fr57047mm"/>
+            <iq:product id="fr645m"/>
             <iq:product id="fr70"/>
+            <iq:product id="fr745"/>
+            <iq:product id="fr945"/>
+            <iq:product id="fr945lte"/>
             <iq:product id="fr955"/>
             <iq:product id="fr965"/>
             <iq:product id="fr970"/>
