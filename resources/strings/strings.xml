@@ -11,8 +11,8 @@
 
     <string id="SetListMode">List layout</string>
     <string id="SetListModePrompt">Pick a fixed layout, or cycle MIN to MID to MAX. "Cycle by tap" needs touch; "Cycle by timer" works without touch.</string>
-    <string id="ListMin">MIN only (11 rows)</string>
-    <string id="ListMid">MID only (carousel)</string>
+    <string id="ListMin">MIN only (7-slot carousel)</string>
+    <string id="ListMid">MID only (5-slot carousel)</string>
     <string id="ListMax">MAX only (1 card)</string>
     <string id="ListCycleTap">Cycle by tap (center)</string>
     <string id="ListCycleTimer">Cycle by timer</string>
