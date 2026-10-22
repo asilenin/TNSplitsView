@@ -1,0 +1,8 @@
+MEM phase=0 laps=3 retained=3 used=24656 free=4472
+MEM phase=1 laps=3 retained=3 used=24776 free=4352
+MEM phase=2 laps=3 retained=3 used=24776 free=4352
+MEM phase=32 laps=33 retained=33 used=26608 free=2520
+MEM phase=62 laps=63 retained=49 used=27584 free=1544
+MEM phase=92 laps=93 retained=49 used=27584 free=1544
+MEM phase=122 laps=123 retained=49 used=27584 free=1544
+MEM PASS retained=49 minFreeAfterDraw=1544

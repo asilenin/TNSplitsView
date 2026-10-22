@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "archive": "7z",
+  "decompression": "passed",
+  "source_products": 80,
+  "packaged_products": 126,
+  "binaries": 126,
+  "bytes": 3361151,
+  "sha256": "5bcc69d34452e5a45d27665f295f6d07e229ce6a89027d8af2f3205c9049230f",
+  "note": "Candidate only; physical-watch acceptance and Store publication remain. Runtime 32 KB history verified separately in memory-fenix6.log."
+}
