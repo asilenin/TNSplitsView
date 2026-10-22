@@ -1,5 +1,5 @@
 <strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
-    <string id="AppName">test TN Splits View</string>
+    <string id="AppName">TN Splits View</string>
 
     <string id="SetTouch">Use touch screen</string>
     <string id="SetTouchPrompt">Turn off to disable all touch features (layout switching by tap, lactate input). On watches without a touch screen these features are always off regardless of this setting.</string>
@@ -11,8 +11,8 @@
 
     <string id="SetListMode">List layout</string>
     <string id="SetListModePrompt">Pick a fixed layout, or cycle MIN to MID to MAX. "Cycle by tap" needs touch; "Cycle by timer" works without touch.</string>
-    <string id="ListMin">MIN only (7-slot carousel)</string>
-    <string id="ListMid">MID only (5-slot carousel)</string>
+    <string id="ListMin">MIN only (6 equal cards)</string>
+    <string id="ListMid">MID only (5 cards, selected enlarged)</string>
     <string id="ListMax">MAX only (1 card)</string>
     <string id="ListCycleTap">Cycle by tap (center)</string>
     <string id="ListCycleTimer">Cycle by timer</string>

@@ -1,0 +1,37 @@
+[
+  {
+    "device": "fr255",
+    "ok": true,
+    "warnings": 9
+  },
+  {
+    "device": "fr645m",
+    "ok": true,
+    "warnings": 9
+  },
+  {
+    "device": "fr735xt",
+    "ok": true,
+    "warnings": 9
+  },
+  {
+    "device": "fr955",
+    "ok": true,
+    "warnings": 9
+  },
+  {
+    "device": "fr965",
+    "ok": true,
+    "warnings": 8
+  },
+  {
+    "device": "fr970",
+    "ok": true,
+    "warnings": 8
+  },
+  {
+    "device": "fenix6",
+    "ok": true,
+    "warnings": 9
+  }
+]

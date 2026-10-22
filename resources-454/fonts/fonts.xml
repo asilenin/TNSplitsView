@@ -1,6 +1,16 @@
 <fonts>
     <!-- Собраны tools/make_fonts.py из fonts-src/; руками не править. -->
+    <font id="Tiny" filename="tiny.fnt" antialias="true"/>
     <font id="Row" filename="row.fnt" antialias="true"/>
-    <font id="Key" filename="key.fnt" antialias="true"/>
+    <font id="Error" filename="error.fnt" antialias="true"/>
+    <font id="Number" filename="number.fnt" antialias="true"/>
+    <font id="Near" filename="near.fnt" antialias="true"/>
+    <font id="Dist" filename="dist.fnt" antialias="true"/>
+    <font id="Distmax" filename="distmax.fnt" antialias="true"/>
+    <font id="Active" filename="active.fnt" antialias="true"/>
     <font id="Big" filename="big.fnt" antialias="true"/>
+    <font id="Max" filename="max.fnt" antialias="true"/>
+    <font id="Key" filename="key.fnt" antialias="true"/>
+    <font id="Ok" filename="ok.fnt" antialias="true"/>
+    <font id="Live" filename="live.fnt" antialias="true"/>
 </fonts>

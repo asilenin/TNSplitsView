@@ -1,0 +1,5 @@
+Golos Text variable font, weights 400 and 600.
+Source: https://github.com/google/fonts/tree/main/ofl/golostext
+Downloaded: 2026-10-21
+SHA-256: 17bb58fb69aec2dfb047a2ebf52534023e9b688c97a6b7ac795b0a72912c2063
+License: OFL.txt (SIL Open Font License 1.1).

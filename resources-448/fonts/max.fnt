@@ -1,0 +1,19 @@
+info face="max" size=71 bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=1 aa=1 padding=0,0,0,0 spacing=1,1
+common lineHeight=86 base=70 scaleW=96 scaleH=337 pages=1 packed=0
+page id=0 file="max.png"
+chars count=15
+char id=48 x=1 y=1 width=46 height=52 xoffset=0 yoffset=19 xadvance=46 page=0 chnl=15
+char id=51 x=48 y=1 width=42 height=52 xoffset=0 yoffset=19 xadvance=42 page=0 chnl=15
+char id=54 x=1 y=54 width=45 height=52 xoffset=0 yoffset=19 xadvance=45 page=0 chnl=15
+char id=56 x=47 y=54 width=45 height=52 xoffset=0 yoffset=19 xadvance=45 page=0 chnl=15
+char id=57 x=1 y=107 width=44 height=52 xoffset=0 yoffset=19 xadvance=44 page=0 chnl=15
+char id=49 x=46 y=107 width=35 height=51 xoffset=0 yoffset=19 xadvance=35 page=0 chnl=15
+char id=50 x=1 y=160 width=43 height=51 xoffset=0 yoffset=19 xadvance=43 page=0 chnl=15
+char id=53 x=45 y=160 width=43 height=51 xoffset=0 yoffset=20 xadvance=43 page=0 chnl=15
+char id=55 x=1 y=212 width=38 height=51 xoffset=0 yoffset=20 xadvance=38 page=0 chnl=15
+char id=52 x=40 y=212 width=44 height=50 xoffset=0 yoffset=20 xadvance=44 page=0 chnl=15
+char id=104 x=1 y=264 width=43 height=50 xoffset=0 yoffset=20 xadvance=43 page=0 chnl=15
+char id=58 x=45 y=264 width=22 height=40 xoffset=0 yoffset=31 xadvance=22 page=0 chnl=15
+char id=45 x=68 y=264 width=27 height=25 xoffset=0 yoffset=45 xadvance=27 page=0 chnl=15
+char id=44 x=1 y=315 width=22 height=21 xoffset=0 yoffset=61 xadvance=22 page=0 chnl=15
+char id=46 x=24 y=315 width=22 height=12 xoffset=0 yoffset=59 xadvance=22 page=0 chnl=15

@@ -1,0 +1,20 @@
+------------------------------------------------------------------------------
+Executing test scrolling...
+PASS
+------------------------------------------------------------------------------
+Executing test retention...
+DEBUG (18:57): retained=150 used=32472 free=8352104
+PASS
+------------------------------------------------------------------------------
+Executing test lactateAndUnits...
+PASS
+
+==============================================================================
+RESULTS
+Test:                               Status:
+scrolling                           PASS
+retention                           PASS
+lactateAndUnits                     PASS
+Ran 3 tests
+
+PASSED (passed=3, failed=0, errors=0)

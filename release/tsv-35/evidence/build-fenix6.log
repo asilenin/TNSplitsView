@@ -1,0 +1,10 @@
+BUILD SUCCESSFUL
+WARNING: fenix6: The launcher icon (65x65) isn't compatible with the specified launcher icon size of the device 'fenix6' (40x40). The image will be scaled to the target size.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:186,16: Cannot determine if container assignment is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:191,20: Cannot determine if container assignment is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:193,20: Cannot determine if container assignment is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:217,12: Cannot determine if container access is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:217,37: Cannot determine if container access is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:219,8: Cannot determine if container access is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:232,35: Cannot determine if container access is using container type.
+WARNING: fenix6: /Users/antonsilenin/.codex/worktrees/tsv-35-store/TNSplitsView/source/TNSplitsViewApp.mc:271,84: Cannot determine if container access is using container type.

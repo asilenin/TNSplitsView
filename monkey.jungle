@@ -14,3 +14,11 @@ round-466x466.resourcePath = $(base.resourcePath);resources-466
 rectangle-320x360.resourcePath = $(base.resourcePath);resources-320
 rectangle-448x486.resourcePath = $(base.resourcePath);resources-448
 semiround-215x180.resourcePath = $(base.resourcePath);resources-215
+
+# TSV-35: no touch hardware on these 32 KB models; omit unreachable input code.
+fenix6.excludeAnnotations = touchInput
+fenix6s.excludeAnnotations = touchInput
+fr245.excludeAnnotations = touchInput
+fr645.excludeAnnotations = touchInput
+fr735xt.excludeAnnotations = touchInput
+fr935.excludeAnnotations = touchInput
