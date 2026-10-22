@@ -7,6 +7,7 @@
 - TN_Splits_View-TSV35-candidate.iq — подписанный пакет для Garmin Store; номер версии вводится в кабинете.
 - devices/fr965.prg — выпускная программа для проверки на физических Forerunner 965. В devices/ также сборки остальных контрольных моделей; ставить только файл своей модели.
 - screenshots/ — 12 снимков 454×454, перечень в SCREENSHOTS.md.
+- hero/TN-Splits-View-Hero.png — обновлённый Hero Image 1440×720 для Garmin Store.
 - RELEASE-NOTES.md — тексты изменений RU/EN.
 - VERIFICATION.md и evidence/ — результаты и пределы проверок.
 - SHA256SUMS.txt — контрольные суммы файлов комплекта.
