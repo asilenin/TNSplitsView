@@ -24,10 +24,6 @@
         <settingConfig type="numeric" min="1" max="60" />
     </setting>
 
-    <setting propertyKey="@Properties.lactateEnabled" title="@Strings.SetLactate" prompt="@Strings.SetLactatePrompt">
-        <settingConfig type="boolean" />
-    </setting>
-
     <setting propertyKey="@Properties.thresholdUnit" title="@Strings.SetUnit" prompt="@Strings.SetUnitPrompt">
         <settingConfig type="list">
             <listEntry value="0">@Strings.UnitKm</listEntry>
