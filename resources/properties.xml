@@ -7,6 +7,8 @@
     <property id="listMode" type="number">3</property>
     <!-- интервал автопереключения для "Cycle by timer", секунды -->
     <property id="cycleSec" type="number">5</property>
+    <!-- ввод лактата вкл/выкл -->
+    <property id="lactateEnabled" type="boolean">false</property>
     <!-- единицы ввода порогов: 0=km, 1=mile -->
     <property id="thresholdUnit" type="number">0</property>
     <!-- пороги темпа mm:ss (верхние границы зон 1..6); зона 7 = бесконечность -->

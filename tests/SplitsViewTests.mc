@@ -37,8 +37,14 @@ function retention(logger) {
 }
 
 (:test)
-function paceUnits(logger) {
+function lactateAndUnits(logger) {
     var v=new SplitsView();
+    v._items=[]; v._fieldRecord=null; v._fieldSession=null;
+    v._val10=250; v.bump(1); Test.assertEqual(v._val10,250);
+    v._val10=0; v.bump(-1); Test.assertEqual(v._val10,0);
+    v._val10=20; v.confirmLactate();
+    Test.assertEqual(v._topIndex,0); Test.assertEqual(v.itemAt(v._topIndex)[0],1);
+    Test.assertEqual(v._pending,20); Test.assertEqual(v._holdSec,10);
     v._useMiles=true;Test.assertEqual(v.fmtPaceU(300),"8:02");
     v._useMiles=false;Test.assertEqual(v.fmtPaceU(300),"5:00");
     return true;

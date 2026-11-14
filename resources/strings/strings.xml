@@ -2,7 +2,7 @@
     <string id="AppName">TN Splits View</string>
 
     <string id="SetTouch">Use touch screen</string>
-    <string id="SetTouchPrompt">Turn off to disable touch features (layout switching by tap). On watches without a touch screen these features are always off regardless of this setting.</string>
+    <string id="SetTouchPrompt">Turn off to disable all touch features (layout switching by tap, lactate input). On watches without a touch screen these features are always off regardless of this setting.</string>
 
     <string id="SetTheme">Theme</string>
     <string id="SetThemePrompt">Dark is black with light text; Light is a white background with black text and darker zone colors.</string>
@@ -19,6 +19,9 @@
 
     <string id="SetCycleSec">Cycle interval (seconds)</string>
     <string id="SetCycleSecPrompt">Used only with "Cycle by timer". Layout changes every N seconds.</string>
+
+    <string id="SetLactate">Enable lactate input</string>
+    <string id="SetLactatePrompt">Requires touch. If the watch has no touch screen, or touch is turned off above, lactate input stays disabled.</string>
 
     <string id="SetUnit">Pace threshold units</string>
     <string id="SetUnitPrompt">Units you enter pace thresholds in. The list on the watch always uses your system units.</string>
@@ -48,4 +51,9 @@
     <string id="ColOrange">Orange</string>
     <string id="ColRed">Red</string>
     <string id="ColPurple">Purple</string>
+
+    <string id="LactateLabel">Lactate</string>
+    <string id="LactateGraphLabel">Blood Lactate</string>
+    <string id="LactateUnits">mmol/L</string>
+    <string id="LactateStopLabel">Lactate after stop</string>
 </strings>
