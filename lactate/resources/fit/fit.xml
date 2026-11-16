@@ -1,0 +1,16 @@
+<fitContributions>
+    <fitField id="1"
+              displayInChart="true"
+              sortOrder="0"
+              precision="1"
+              chartTitle="@Strings.LactateGraphLabel"
+              dataLabel="@Strings.LactateLabel"
+              unitLabel="@Strings.LactateUnits"
+              fillColor="#33CCFF" />
+    <fitField id="2"
+              displayInActivitySummary="true"
+              sortOrder="1"
+              precision="1"
+              dataLabel="@Strings.LactateStopLabel"
+              unitLabel="@Strings.LactateUnits" />
+</fitContributions>

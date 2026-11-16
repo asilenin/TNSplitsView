@@ -1,0 +1,4 @@
+<properties>
+    <!-- 0 = тёмная, 1 = светлая -->
+    <property id="theme" type="number">0</property>
+</properties>
