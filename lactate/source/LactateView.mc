@@ -32,7 +32,7 @@ class LactateApp extends Application.AppBase {
 
 class LactateView extends WatchUi.DataField {
     var _samples;          // [val10, timerMs], val10 — десятые ммоль/л
-    var _first;
+    var _selected;         // запись в центре карусели, как выбранный круг в поле кругов
     var _mode;             // 0 список, 1 ввод
     var _val10;
     const MIN10 = 0;
@@ -49,11 +49,17 @@ class LactateView extends WatchUi.DataField {
     var _fg;
     var _dim;
     var _accent;
+    var _card;
+    var _fonts;
+    var _fontIds;
+    // Низ видимых цифр Golos от начала строки, в координатах макета 454.
+    // Папки resources-<ширина> уже уменьшены под экран, а координаты идут через sc().
+    var _digitBottom;
 
     function initialize() {
         DataField.initialize();
         _samples = [];
-        _first = 0;
+        _selected = 0;
         _mode = 0;
         _val10 = 20;       // старт ввода 2,0 — нижняя область лактатного порога
         _pending = 0;
@@ -61,6 +67,9 @@ class LactateView extends WatchUi.DataField {
         _timerMs = 0;
         _w = 0;
         _h = 0;
+        _fonts = null;
+        _fontIds = null;
+        _digitBottom = [ 16, 20, 20, 24, 36, 40, 48 ];
         _fieldRecord = null;
         _fieldSession = null;
         reloadTheme();
@@ -80,9 +89,9 @@ class LactateView extends WatchUi.DataField {
         var th = Application.Properties.getValue("theme");
         _light = (th != null && th == 1);
         if (_light) {
-            _bg = 0xFFFFFF; _fg = 0x000000; _dim = 0x5C5C5C; _accent = 0x0077B6;
+            _bg = 0xFFFFFF; _fg = 0x000000; _dim = 0x5C5C5C; _accent = 0x0086C8; _card = 0xEAF3ED;
         } else {
-            _bg = 0x000000; _fg = 0xFFFFFF; _dim = 0x9A9A9A; _accent = 0x33CCFF;
+            _bg = 0x000000; _fg = 0xFFFFFF; _dim = 0x9A9A9A; _accent = 0x33CCFF; _card = 0x17231D;
         }
     }
 
@@ -129,28 +138,31 @@ class LactateView extends WatchUi.DataField {
         _samples.add([ _val10, tMs ]);
         while (_samples.size() > SAMPLE_CAP) { _samples.remove(_samples[0]); }
         _mode = 0;
-        _first = _samples.size();
-        shift(0);
+        _selected = _samples.size() - 1;
         WatchUi.requestUpdate();
     }
 
     function valStr() { return valText(_val10); }
     function valText(v10) { return (v10 / 10).format("%d") + "," + (v10 % 10).format("%d"); }
 
+    // Как время замера в списке поля кругов: минуты и секунды, без отдельного часа.
     function fmtClock(tMs) {
         var s = (tMs / 1000).toNumber();
-        var h = s / 3600;
-        var m = (s % 3600) / 60;
-        var sec = s % 60;
-        if (h > 0) { return h.format("%d") + ":" + m.format("%02d") + ":" + sec.format("%02d"); }
-        return m.format("%d") + ":" + sec.format("%02d");
+        return (s / 60).format("%d") + ":" + (s % 60).format("%02d");
     }
 
-    function gutter() { return (_w * 0.18).toNumber(); }
-    function listFont() {
-        if (_h < 160) { return Graphics.FONT_XTINY; }
-        if (_h < 280) { return Graphics.FONT_SMALL; }
-        return Graphics.FONT_MEDIUM;
+    function sc(v) { return (v * ((_w < _h) ? _w : _h) / 454.0 + 0.5).toNumber(); }
+    function px(v) { return (_w - sc(454)) / 2 + sc(v); }
+    function py(v) { return (_h - sc(454)) / 2 + sc(v); }
+    function clampSelected() {
+        var n = _samples.size();
+        if (n == 0) { _selected = 0; return; }
+        if (_selected < 0) { _selected = 0; }
+        if (_selected >= n) { _selected = n - 1; }
+    }
+    function nudge(d) {
+        _selected += d;
+        clampSelected();
     }
     function keyFont() {
         if (_h < 200) { return Graphics.FONT_TINY; }
@@ -161,21 +173,6 @@ class LactateView extends WatchUi.DataField {
         if (_h < 200) { return Graphics.FONT_MEDIUM; }
         if (_h < 320) { return Graphics.FONT_LARGE; }
         return Graphics.FONT_NUMBER_MILD;
-    }
-    function rowCount() {
-        if (_h < 1) { return 5; }
-        var rh = Graphics.getFontHeight(listFont()) + 6;
-        var n = ((_h * 0.82) / rh).toNumber();
-        if (n < 3) { n = 3; }
-        if (n > 8) { n = 8; }
-        return n;
-    }
-    function shift(d) {
-        _first += d;
-        var maxFirst = _samples.size() - rowCount();
-        if (maxFirst < 0) { maxFirst = 0; }
-        if (_first < 0) { _first = 0; }
-        if (_first > maxFirst) { _first = maxFirst; }
     }
 
     // Зоны те же, что на проверенном вводе поля кругов: три колонки, два ряда,
@@ -202,19 +199,28 @@ class LactateView extends WatchUi.DataField {
     }
 
     function handleListTap(x, y) {
-        if (x > _w - gutter()) {
+        // Правый край — ввод, верх и низ листают карусель. Так же, как в поле кругов.
+        if (x > _w * 0.82) {
             _mode = 1;
             WatchUi.requestUpdate();
             return;
         }
-        if (y < _h / 3) { shift(-1); }
-        else if (y > _h * 2 / 3) { shift(1); }
+        if (y < _h / 3) { nudge(-1); }
+        else if (y > _h * 2 / 3) { nudge(1); }
         WatchUi.requestUpdate();
     }
 
     function onLayout(dc) {
         _w = dc.getWidth();
         _h = dc.getHeight();
+        if (_fontIds == null) {
+            // Те же размеры, что у карусели поля кругов: 0 край, 3 сосед, 6 центр.
+            _fontIds = [
+                Rez.Fonts.Tiny, Rez.Fonts.Row, Rez.Fonts.Number, Rez.Fonts.Near,
+                Rez.Fonts.Dist, Rez.Fonts.Distmax, Rez.Fonts.Active
+            ];
+            _fonts = new [7];
+        }
     }
 
     function onUpdate(dc) {
@@ -224,45 +230,82 @@ class LactateView extends WatchUi.DataField {
         else { drawList(dc); }
     }
 
+    function font(f) {
+        if (_fonts[f] == null) { _fonts[f] = WatchUi.loadResource(_fontIds[f]); }
+        return _fonts[f];
+    }
+    function fitFont(dc, s, f, width) {
+        while (f > 0 && dc.getTextWidthInPixels(s, font(f)) > sc(width)) { f -= 1; }
+        return f;
+    }
+    function lineText(dc, s, x, y, width, f, color, align) {
+        f = fitFont(dc, s, f, width);
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(px(x), py(y), font(f), s, align);
+        return f;
+    }
+    function valueText(dc, s, x, y, width, f, color, align) {
+        f = lineText(dc, s, x, y, width, f, color, align);
+        return y + _digitBottom[f];
+    }
+    function labelText(dc, s, x, inkTop, width, color) {
+        lineText(dc, s, x, inkTop - 6, width, 1, color, Graphics.TEXT_JUSTIFY_LEFT);
+    }
+
+    // Карусель MID поля кругов: пять мест, выбранный замер по центру.
+    // Координаты и размеры шрифта скопированы оттуда, чтобы карточка совпала со снимком.
     function drawList(dc) {
-        var g = gutter();
-        var font = listFont();
-        var mid = Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER;
         dc.setColor(_fg, _bg);
         dc.clear();
-        var top = (_h * 0.08).toNumber();
-        dc.setColor(_dim, Graphics.COLOR_TRANSPARENT);
-        dc.drawText((_w - g) / 2, top, Graphics.FONT_XTINY, "mmol/L", mid);
-        var rows = rowCount();
         var n = _samples.size();
-        var bodyTop = top + Graphics.getFontHeight(Graphics.FONT_XTINY);
-        var rh = (_h - bodyTop) / rows;
-        if (n == 0) {
-            dc.setColor(_dim, Graphics.COLOR_TRANSPARENT);
-            dc.drawText((_w - g) / 2, _h / 2, font, "Tap +", mid);
-        } else {
-            shift(0);
-            for (var i = 0; i < rows; i += 1) {
-                var idx = _first + i;
-                if (idx >= n) { break; }
-                var it = _samples[idx];
-                var y = bodyTop + i * rh + rh / 2;
-                var newest = (idx == n - 1);
-                dc.setColor(newest ? _fg : _dim, Graphics.COLOR_TRANSPARENT);
-                dc.drawText(8, y, font, fmtClock(it[1]), Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
-                dc.setColor(newest ? _accent : _fg, Graphics.COLOR_TRANSPARENT);
-                dc.drawText(_w - g - 6, y, font, valText(it[0]), Graphics.TEXT_JUSTIFY_RIGHT | Graphics.TEXT_JUSTIFY_VCENTER);
-            }
+        clampSelected();
+        for (var i = 0; i < 5; i += 1) {
+            var idx = _selected + i - 2;
+            if (n == 0 || idx < 0 || idx >= n) { continue; }
+            var x = 81; var y = 49; var w = 278; var h = 56; var size = 3;
+            if (i == 0 || i == 4) { x = 117; w = 184; h = 52; size = 1; }
+            else if (i == 2) { x = 34; w = 350; h = 115.4; size = 6; }
+            else { x = 70; }
+            if (i == 0) { y = 36; }
+            else if (i == 1) { y = 94; }
+            else if (i == 2) { y = 156; }
+            else if (i == 3) { y = 277.4; }
+            else { y = 339.4; }
+            drawSample(dc, _samples[idx], x, y, w, h, size);
         }
-        var bw = g - 4;
-        var bh = (_h * 0.22).toNumber();
-        if (bh < 28) { bh = 28; }
-        var bx = _w - bw - 2;
-        var by = (_h - bh) / 2;
-        dc.setColor(_accent, Graphics.COLOR_TRANSPARENT);
-        dc.fillRoundedRectangle(bx, by, bw, bh, 10);
-        dc.setColor(_bg, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(bx + bw / 2, by + bh / 2, keyFont(), "+", mid);
+        if (n == 0) { drawSample(dc, null, 34, 156, 350, 115.4, 6); }
+        drawDrop(dc);
+    }
+
+    function drawSample(dc, it, x, y, w, h, size) {
+        var active = (size == 6);
+        dc.setColor(_card, Graphics.COLOR_TRANSPARENT);
+        dc.fillRoundedRectangle(px(x), py(y), sc(w), sc(h), sc(active ? 12 : 8));
+        var left = x + (active ? 12 : 8);
+        var right = x + w - (active ? 12 : 8);
+        var l = Graphics.TEXT_JUSTIFY_LEFT;
+        var r = Graphics.TEXT_JUSTIFY_RIGHT;
+        lineText(dc, "lactate", left, y + (active ? 10 : 4), w / 2, active ? 2 : 0, _accent, l);
+        lineText(dc, "mmol/L", right, y + 2, w / 2, 1, _dim, r);
+        if (it == null) { return; }
+        var bottom = valueText(dc, valText(it[0]), left, y + (active ? 44 : 26), w / 2, size, _accent, l);
+        valueText(dc, fmtClock(it[1]), right, y + (active ? 44 : 26), w / 2, size, _dim, r);
+        if (active) {
+            labelText(dc, "value", left, bottom + 5, 100, _dim);
+            labelText(dc, "time", right - 60, bottom + 5, 60, _dim);
+        }
+    }
+
+    function drop(dc, x, y, h, color) {
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.fillCircle(x, y + h * 0.25, h * 0.35);
+        dc.fillPolygon([ [x, y - h * 0.5], [x - h * 0.309, y + h * 0.087], [x + h * 0.309, y + h * 0.087] ]);
+    }
+
+    function drawDrop(dc) {
+        dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
+        dc.fillRoundedRectangle(px(386), py(195), sc(64), sc(64), sc(20));
+        drop(dc, px(418), py(227), sc(36), _bg);
     }
 
     function drawInput(dc) {

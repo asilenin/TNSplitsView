@@ -19,7 +19,7 @@ function entryAndCap(logger) {
     Test.assertEqual(v._samples[0][0], 20);
     Test.assertEqual(v.fmtClock(0), "0:00");
     Test.assertEqual(v.fmtClock(65000), "1:05");
-    Test.assertEqual(v.fmtClock(3661000), "1:01:01");
+    Test.assertEqual(v.fmtClock(3661000), "61:01");
     for (var i = 0; i <= SAMPLE_CAP; i += 1) {
         v._val10 = i;
         v.confirm();
